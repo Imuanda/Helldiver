@@ -15,10 +15,18 @@ app = Flask(__name__)
 # ── Config ────────────────────────────────────────────────────────────────────
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-# On Render, the persistent disk is mounted at /data — use that path in production
-# DATABASE_PATH env var lets us override the location without changing code
-db_path = os.environ.get('DATABASE_PATH', os.path.join(basedir, 'database.db'))
-app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
+# Use PostgreSQL on Render (DATABASE_URL is set automatically when you link the DB)
+# Fall back to local SQLite for development
+database_url = os.environ.get('DATABASE_URL', '')
+
+if database_url:
+    # Render provides 'postgres://' but SQLAlchemy requires 'postgresql://'
+    database_url = database_url.replace('postgres://', 'postgresql://', 1)
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+else:
+    # Local development — SQLite file next to app.py
+    db_path = os.environ.get('DATABASE_PATH', os.path.join(basedir, 'database.db'))
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # SECRET_KEY must be set as an environment variable in production
