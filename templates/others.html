@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Helldiver — Other Colors{% endblock %}
+
+{% block content %}
+<main class="main-content color-page">
+
+    <!-- Header — rainbow gradient since this page covers all remaining colors -->
+    <header class="color-header others-header">
+        <div class="color-header-dot others-dot-large"></div>
+        <div>
+            <h1 class="color-title others-title">Other Colors</h1>
+            <p class="color-caste">The Remaining Castes of the Society</p>
+        </div>
+    </header>
+
+    <!-- Intro description -->
+    <div class="color-description">
+        <p>
+            Beyond the seven Colors with dedicated pages lie the remaining castes — each with their
+            own role, their own world, and their own fixed place in the rigid hierarchy that shapes
+            every life born under the Society. They are not celebrated or sung about. They simply
+            hold civilization together, largely unseen.
+        </p>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- Grid of color cards — one per remaining color -->
+    <!-- Each card mirrors the visual style of a quote card so the design stays consistent -->
+    <div class="others-grid">
+        {% for color in colors %}
+        <div class="other-color-card">
+
+            <!-- Color name and dot -->
+            <div class="other-color-header">
+                <span class="color-dot-large" style="background: {{ color.hex }}; box-shadow: 0 0 8px {{ color.hex }}"></span>
+                <h3 class="other-color-name" style="color: {{ color.hex }}">{{ color.name }}</h3>
+            </div>
+
+            <!-- Description of this color's role -->
+            <p class="other-color-desc">{{ color.description }}</p>
+
+        </div>
+        {% endfor %}
+    </div>
+
+</main>
+{% endblock %}

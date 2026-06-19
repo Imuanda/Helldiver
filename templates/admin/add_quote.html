@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %}Helldiver — Add Quote{% endblock %}
+
+{% block content %}
+<main class="main-content color-page">
+    <header class="color-header" style="--color-accent: var(--gold)">
+        <div class="color-header-dot" style="background:var(--gold)"></div>
+        <div>
+            <h1 class="color-title" style="color:var(--gold)">Add a Quote</h1>
+            <p class="color-caste">Owner-added quotes go live immediately</p>
+        </div>
+    </header>
+    <div style="margin-top:1rem"><a href="/admin" class="admin-link">&larr; Back to Dashboard</a></div>
+    <hr class="section-divider">
+
+    <form method="POST" action="/admin/add-quote" class="submit-form" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="form-group {% if errors.quote_text %}has-error{% endif %}">
+            <label class="form-label" for="quote_text">Quote <span class="required-star">*</span></label>
+            <textarea class="form-input form-textarea" id="quote_text" name="quote_text" rows="4" maxlength="600" required>{{ form_data.get('quote_text','') }}</textarea>
+            {% if errors.quote_text %}<span class="form-error">{{ errors.quote_text }}</span>{% endif %}
+        </div>
+
+        <div class="form-group {% if errors.speaker %}has-error{% endif %}">
+            <label class="form-label" for="speaker">Speaker <span class="required-star">*</span></label>
+            <input class="form-input" type="text" id="speaker" name="speaker" maxlength="100" value="{{ form_data.get('speaker','') }}" required>
+            {% if errors.speaker %}<span class="form-error">{{ errors.speaker }}</span>{% endif %}
+        </div>
+
+        <div class="form-group {% if errors.book %}has-error{% endif %}">
+            <label class="form-label" for="book">Book <span class="required-star">*</span></label>
+            <select class="form-input form-select" id="book" name="book" required>
+                <option value="" disabled {% if not form_data.get('book') %}selected{% endif %}>Select a book…</option>
+                {% for b in books %}<option value="{{ b }}" {% if form_data.get('book')==b %}selected{% endif %}>{{ b }}</option>{% endfor %}
+            </select>
+            {% if errors.book %}<span class="form-error">{{ errors.book }}</span>{% endif %}
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+            <div class="form-group">
+                <label class="form-label" for="chapter">Chapter <span class="optional-tag">optional</span></label>
+                <input class="form-input" type="text" id="chapter" name="chapter" maxlength="20" value="{{ form_data.get('chapter','') }}">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="page">Page <span class="optional-tag">optional</span></label>
+                <input class="form-input" type="number" id="page" name="page" min="1" value="{{ form_data.get('page','') }}">
+            </div>
+        </div>
+
+        <div class="form-group {% if errors.color %}has-error{% endif %}">
+            <label class="form-label" for="color">Society Color <span class="required-star">*</span></label>
+            <select class="form-input form-select" id="color" name="color">
+                <option value="">Auto-detect from speaker</option>
+                {% for c in colors %}<option value="{{ c }}" {% if form_data.get('color')==c %}selected{% endif %}>{{ c|capitalize }}</option>{% endfor %}
+            </select>
+            {% if errors.color %}<span class="form-error">{{ errors.color }}</span>{% endif %}
+        </div>
+
+        <div class="form-group {% if errors.perspective %}has-error{% endif %}">
+            <label class="form-label" for="perspective">Perspective <span class="optional-tag">optional</span></label>
+            <textarea class="form-input form-textarea" id="perspective" name="perspective" rows="2" maxlength="400">{{ form_data.get('perspective','') }}</textarea>
+            {% if errors.perspective %}<span class="form-error">{{ errors.perspective }}</span>{% endif %}
+        </div>
+
+        <button type="submit" class="auth-btn">Add Quote (goes live immediately)</button>
+    </form>
+</main>
+{% endblock %}

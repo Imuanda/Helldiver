@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}Helldiver — Admin{% endblock %}
+
+{% block content %}
+<main class="main-content color-page">
+
+    <header class="color-header" style="--color-accent: var(--gold)">
+        <div class="color-header-dot" style="background:var(--gold); box-shadow:0 0 20px var(--gold)"></div>
+        <div>
+            <h1 class="color-title" style="color:var(--gold)">Admin Panel</h1>
+            <p class="color-caste">Welcome, {{ current_user.username }}</p>
+        </div>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}{% for cat, msg in messages %}
+        <div class="flash-msg flash-{{ cat }}" style="margin:1rem 0">{{ msg }}</div>
+        {% endfor %}{% endif %}
+    {% endwith %}
+
+    <!-- Stats row -->
+    <div class="admin-stats">
+        <div class="stat-card">
+            <span class="stat-num">{{ stats.validated }}</span>
+            <span class="stat-label">Live Quotes</span>
+        </div>
+        <div class="stat-card stat-alert">
+            <span class="stat-num">{{ stats.pending }}</span>
+            <span class="stat-label">Pending Review</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-num">{{ stats.rejected }}</span>
+            <span class="stat-label">Rejected</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-num">{{ stats.users }}</span>
+            <span class="stat-label">Registered Users</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-num">{{ stats.comments }}</span>
+            <span class="stat-label">Total Comments</span>
+        </div>
+        <div class="stat-card {% if stats.banned %}stat-alert{% endif %}">
+            <span class="stat-num">{{ stats.banned }}</span>
+            <span class="stat-label">Banned Users</span>
+        </div>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- Quick actions -->
+    <div class="admin-actions">
+        <a href="/admin/pending" class="admin-btn {% if stats.pending %}admin-btn-alert{% endif %}">
+            &#9670; Review Pending Quotes {% if stats.pending %}({{ stats.pending }}){% endif %}
+        </a>
+        <a href="/admin/add-quote" class="admin-btn">&#43; Add a Quote</a>
+        <a href="/admin/users"    class="admin-btn">&#9670; Manage Users</a>
+    </div>
+
+    {% if recent_pending %}
+    <hr class="section-divider">
+    <h2 class="section-heading">Recently Submitted (Pending)</h2>
+    {% for q in recent_pending %}
+    <div class="pending-preview">
+        <p class="pending-text">&#8220;{{ q.text[:120] }}{% if q.text|length > 120 %}…{% endif %}&#8221;</p>
+        <p class="pending-meta">{{ q.speaker }} &middot; {{ q.book }} &middot; <em>{{ q.color }}</em></p>
+    </div>
+    {% endfor %}
+    <a href="/admin/pending" class="admin-link">Review all &rarr;</a>
+    {% endif %}
+
+</main>
+{% endblock %}

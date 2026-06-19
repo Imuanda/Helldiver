@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% block title %}Helldiver — Home{% endblock %}
+
+{% block content %}
+<main class="main-content">
+
+{% if quote %}
+<article class="quote-card" data-quote-id="{{ quote.id }}">
+
+    <div class="quote-mark open-quote">&#10077;</div>
+    <p class="quote-text">{{ quote.text }}</p>
+    <div class="quote-mark close-quote">&#10078;</div>
+
+    <hr class="card-divider">
+
+    <div class="quote-meta">
+        <span class="quote-speaker">&#8212;&nbsp;{{ quote.speaker }}</span>
+        <span class="quote-source">
+            {{ quote.book }}
+            {% if quote.chapter %}&nbsp;&middot;&nbsp;Chapter {{ quote.chapter }}{% endif %}
+            {% if quote.page    %}&nbsp;&middot;&nbsp;Page {{ quote.page }}{% endif %}
+        </span>
+    </div>
+
+    <!-- Perspective section — only shown when a user submitted one with the quote -->
+    {% if quote.perspective %}
+    <div class="perspective-section">
+        <span class="perspective-label">&#128172; Why I love this quote</span>
+        <p class="perspective-text">{{ quote.perspective }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Reaction buttons — no login needed, AJAX-powered -->
+    <div class="reactions-row">
+        <button class="reaction-btn" data-type="heart" data-quote-id="{{ quote.id }}" title="Like">
+            <span class="reaction-emoji">&#10084;&#65039;</span>
+            <span class="reaction-count">{{ quote.heart_count }}</span>
+        </button>
+        <button class="reaction-btn" data-type="fire" data-quote-id="{{ quote.id }}" title="Fire">
+            <span class="reaction-emoji">&#128293;</span>
+            <span class="reaction-count">{{ quote.fire_count }}</span>
+        </button>
+        <button class="reaction-btn" data-type="shocked" data-quote-id="{{ quote.id }}" title="Shocked">
+            <span class="reaction-emoji">&#128562;</span>
+            <span class="reaction-count">{{ quote.shocked_count }}</span>
+        </button>
+        <div class="like-total">
+            <span>&#9829;</span>
+            <span class="total-likes">{{ quote.likes }}</span>
+        </div>
+    </div>
+
+    <!-- Comment section — no login needed -->
+    <div class="comments-section">
+        <h3 class="comments-title">Comments</h3>
+
+        <!-- Comment input form -->
+        <form class="comment-form" id="comment-form" data-quote-id="{{ quote.id }}" novalidate>
+            <div class="comment-input-wrap">
+                <textarea
+                    class="comment-textarea"
+                    id="comment-text"
+                    name="text"
+                    placeholder="Leave a comment…"
+                    maxlength="500"
+                    rows="2"
+                ></textarea>
+                <button type="submit" class="comment-submit">Post</button>
+            </div>
+            <span class="comment-char-count">0 / 500</span>
+            <div class="comment-error" id="comment-error" style="display:none"></div>
+        </form>
+
+        <!-- Comment list — populated by interactions.js on page load -->
+        <div class="comment-list" id="comment-list">
+            <div class="comments-loading">Loading comments…</div>
+        </div>
+
+    </div>
+
+</article>
+
+{% else %}
+<div class="empty-state" style="max-width:500px; margin:auto;">
+    <div class="empty-icon">&#9670;</div>
+    <p class="empty-title">No quotes yet</p>
+    <p class="empty-sub">Validated quotes will appear here once they are added to the database.</p>
+</div>
+{% endif %}
+
+</main>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/interactions.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Helldiver — Users{% endblock %}
+
+{% block content %}
+<main class="main-content color-page">
+    <header class="color-header" style="--color-accent: var(--gold)">
+        <div class="color-header-dot" style="background:var(--gold)"></div>
+        <div>
+            <h1 class="color-title" style="color:var(--gold)">Users</h1>
+            <p class="color-caste">{{ users|length }} registered accounts</p>
+        </div>
+    </header>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}{% for cat, msg in messages %}
+        <div class="flash-msg flash-{{ cat }}" style="margin:1rem 0">{{ msg }}</div>
+        {% endfor %}{% endif %}
+    {% endwith %}
+    <div style="margin-top:1rem"><a href="/admin" class="admin-link">&larr; Back to Dashboard</a></div>
+    <hr class="section-divider">
+
+    {% for u in users %}
+    <div class="pending-card {% if u.is_banned %}banned-card{% endif %}">
+        <div class="pending-meta-row">
+            <strong class="comment-author">{{ u.username }}</strong>
+            <span style="color:var(--text-dim); font-size:0.75rem;">{{ u.email }}</span>
+            {% if u.is_admin %}<span class="pending-color-badge" style="background:rgba(212,175,55,0.2)">admin</span>{% endif %}
+            {% if u.is_banned %}<span class="pending-color-badge" style="background:rgba(193,68,14,0.2); color:#e05a20">banned</span>{% endif %}
+            <span style="color:var(--text-dim); font-size:0.7rem; margin-left:auto">Joined {{ u.created_at.strftime('%b %d, %Y') }}</span>
+        </div>
+        {% if u.ban_reason %}<p style="font-size:0.75rem; color:#e05a20; margin-top:0.4rem">Reason: {{ u.ban_reason }}</p>{% endif %}
+        {% if not u.is_admin %}
+        <div class="pending-actions" style="margin-top:0.75rem">
+            {% if not u.is_banned %}
+            <form method="POST" action="/admin/users/{{ u.id }}/ban" style="display:flex; gap:0.5rem; align-items:center">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input class="form-input" type="text" name="reason" placeholder="Ban reason…" style="flex:1; padding:0.4rem 0.7rem; font-size:0.78rem">
+                <button type="submit" class="admin-btn admin-btn-reject" style="white-space:nowrap">Ban User</button>
+            </form>
+            {% else %}
+            <form method="POST" action="/admin/users/{{ u.id }}/unban">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="admin-btn admin-btn-approve">Unban</button>
+            </form>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</main>
+{% endblock %}

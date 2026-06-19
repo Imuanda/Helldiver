@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Helldiver — Something Went Wrong{% endblock %}
+
+{% block content %}
+<main class="main-content auth-page">
+    <div class="auth-card" style="text-align:center;">
+        <p class="quote-mark open-quote" style="position:static; font-size:4rem; opacity:0.2; margin-bottom:0.5rem;">&#10077;</p>
+        <h1 class="auth-title" style="font-size:3rem; opacity:0.4;">500</h1>
+        <p class="color-caste" style="margin:0.5rem 0 1.5rem;">Something went wrong on our end.</p>
+        <p class="other-color-desc" style="margin-bottom:2rem;">
+            The server ran into an unexpected problem. This has been noted.
+            You can try again or return to the home page.
+        </p>
+        <a href="/home" class="auth-btn" style="display:inline-block; text-decoration:none; padding: 0.7rem 2rem; width:auto;">
+            Return Home
+        </a>
+    </div>
+</main>
+{% endblock %}

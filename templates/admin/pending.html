@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}Helldiver — Pending Quotes{% endblock %}
+
+{% block content %}
+<main class="main-content color-page">
+
+    <header class="color-header" style="--color-accent: var(--gold)">
+        <div class="color-header-dot" style="background:var(--gold)"></div>
+        <div>
+            <h1 class="color-title" style="color:var(--gold)">Pending Quotes</h1>
+            <p class="color-caste">{{ quotes|length }} awaiting review</p>
+        </div>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}{% for cat, msg in messages %}
+        <div class="flash-msg flash-{{ cat }}" style="margin:1rem 0">{{ msg }}</div>
+        {% endfor %}{% endif %}
+    {% endwith %}
+
+    <div style="margin-top:1rem">
+        <a href="/admin" class="admin-link">&larr; Back to Dashboard</a>
+    </div>
+    <hr class="section-divider">
+
+    {% if not quotes %}
+    <div class="empty-state">
+        <div class="empty-icon">&#9670;</div>
+        <p class="empty-title">All clear</p>
+        <p class="empty-sub">No quotes are waiting for review.</p>
+    </div>
+    {% endif %}
+
+    {% for q in quotes %}
+    <div class="pending-card">
+        <p class="pending-text">&#8220;{{ q.text }}&#8221;</p>
+        <div class="pending-meta-row">
+            <span>&#8212; {{ q.speaker }}</span>
+            <span>&middot; {{ q.book }}</span>
+            {% if q.chapter %}<span>&middot; Ch. {{ q.chapter }}</span>{% endif %}
+            {% if q.page %}<span>&middot; p.{{ q.page }}</span>{% endif %}
+            <span class="pending-color-badge">{{ q.color }}</span>
+            <span class="pending-source">source: {{ q.source }}</span>
+        </div>
+        {% if q.perspective %}
+        <p class="pending-perspective">&#128172; {{ q.perspective }}</p>
+        {% endif %}
+        <div class="pending-actions">
+            <form method="POST" action="/admin/quotes/{{ q.id }}/approve" style="display:inline">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="admin-btn admin-btn-approve">&#10003; Approve</button>
+            </form>
+            <form method="POST" action="/admin/quotes/{{ q.id }}/reject" style="display:inline">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="admin-btn admin-btn-reject">&#10007; Reject</button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+
+</main>
+{% endblock %}

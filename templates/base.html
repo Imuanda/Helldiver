@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>{% block title %}Helldiver{% endblock %}</title>
+
+    <!-- PWA foundation — required for app store submission via Capacitor -->
+    <meta name="theme-color" content="#050510">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Helldiver">
+    <meta name="application-name" content="Helldiver">
+    <meta name="description" content="Quotes from the Red Rising Saga by Pierce Brown.">
+    <!-- Web App Manifest — tells browsers and Capacitor how to install the app -->
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <!-- Apple touch icon — shown on iOS home screen -->
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon-180.png') }}">
+    <!-- Standard favicon -->
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='icons/icon-192.png') }}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Playfair+Display:ital,wght@1,400;1,600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+    <div class="atmo-bg"></div>
+
+    <button class="toggle-btn" id="toggle-btn" aria-label="Toggle navigation">
+        <span class="toggle-icon">&#9776;</span>
+    </button>
+
+    <nav class="sidebar" id="sidebar" aria-label="Main navigation">
+
+        <div class="sidebar-brand">
+            <span class="brand-title">HELLDIVER</span>
+            <span class="brand-sub">Red Rising Saga</span>
+        </div>
+
+        <ul class="nav-list">
+
+            <li class="nav-item">
+                <a href="/home" class="nav-link {% if active_page == 'home' %}active{% endif %}">
+                    <span class="nav-icon">&#8962;</span>
+                    <span>Home</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <button class="nav-link colors-toggle" id="colors-toggle" aria-expanded="{{ 'true' if active_page != 'home' else 'false' }}">
+                    <span class="nav-icon">&#9670;</span>
+                    <span>Colors</span>
+                    <span class="chevron {% if active_page != 'home' %}rotated{% endif %}" id="colors-chevron">&#8250;</span>
+                </button>
+
+                <ul class="colors-submenu {% if active_page != 'home' %}open{% endif %}" id="colors-submenu">
+                    {% set dedicated = [
+                        ('gold',     'Gold',     '#d4af37'),
+                        ('red',      'Red',      '#c0392b'),
+                        ('obsidian', 'Obsidian', '#3a3a3a'),
+                        ('gray',     'Gray',     '#8e9aaf'),
+                        ('silver',   'Silver',   '#b0b0c0'),
+                        ('pink',     'Pink',     '#e75480'),
+                        ('blue',     'Blue',     '#4a90e2'),
+                    ] %}
+                    {% for slug, label, hex in dedicated %}
+                    <li>
+                        <a href="/colors/{{ slug }}"
+                           class="color-link {% if active_page == slug %}color-link-active{% endif %}">
+                            <span class="color-dot" style="background: {{ hex }}"></span>
+                            {{ label }}
+                        </a>
+                    </li>
+                    {% endfor %}
+                    <li class="others-divider"><span>Others</span></li>
+                    <li>
+                        <a href="/colors/others"
+                           class="color-link {% if active_page == 'others' %}color-link-active{% endif %}">
+                            <span class="color-dot others-dot"></span> All Other Colors
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+            <!-- Submit a Quote — requires login -->
+            <li class="nav-item nav-submit">
+                <a href="/submit-quote"
+                   class="nav-link {% if active_page == 'submit' %}active{% endif %}">
+                    <span class="nav-icon">&#43;</span>
+                    <span>Submit a Quote</span>
+                </a>
+            </li>
+
+        </ul>
+
+        <!-- Auth footer — changes based on login state -->
+        <div class="sidebar-footer">
+            {% if current_user.is_authenticated %}
+                <span class="footer-username">&#9670; {{ current_user.username }}</span>
+                <a href="/logout" class="footer-link">Sign Out</a>
+            {% else %}
+                <a href="/login"  class="footer-link">Sign In</a>
+                <span class="footer-sep">&middot;</span>
+                <a href="/signup" class="footer-link">Register</a>
+            {% endif %}
+        </div>
+
+    </nav>
+
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    {% block content %}{% endblock %}
+
+    <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+    <!-- Locks all submit buttons on first click to prevent duplicate submissions -->
+    <script src="{{ url_for('static', filename='js/forms.js') }}"></script>
+    {% block extra_scripts %}{% endblock %}
+
+</body>
+</html>

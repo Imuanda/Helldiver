@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Helldiver — Page Not Found{% endblock %}
+
+{% block content %}
+<main class="main-content auth-page">
+    <div class="auth-card" style="text-align:center;">
+        <p class="quote-mark open-quote" style="position:static; font-size:4rem; opacity:0.2; margin-bottom:0.5rem;">&#10077;</p>
+        <h1 class="auth-title" style="font-size:3rem; opacity:0.4;">404</h1>
+        <p class="color-caste" style="margin:0.5rem 0 1.5rem;">This page does not exist.</p>
+        <p class="other-color-desc" style="margin-bottom:2rem;">
+            The page you're looking for may have been moved, deleted, or never existed.
+            Even in the Society, some doors stay locked.
+        </p>
+        <a href="/home" class="auth-btn" style="display:inline-block; text-decoration:none; padding: 0.7rem 2rem; width:auto;">
+            Return Home
+        </a>
+    </div>
+</main>
+{% endblock %}

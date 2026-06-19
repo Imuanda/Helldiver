@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}Helldiver — Sign In{% endblock %}
+
+{% block content %}
+<main class="main-content auth-page">
+    <div class="auth-card">
+
+        <div class="auth-header">
+            <h1 class="auth-title">Sign In</h1>
+            <p class="auth-sub">Welcome back to the saga.</p>
+        </div>
+
+        <!-- Flash messages (e.g. "Please sign in to submit a quote") -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="flash-msg flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="/login" class="auth-form" novalidate>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="form-group {% if error %}has-error{% endif %}">
+                <label class="form-label" for="email">Email</label>
+                <input
+                    class="form-input"
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="your@email.com"
+                    autocomplete="email"
+                    required
+                >
+            </div>
+
+            <div class="form-group {% if error %}has-error{% endif %}">
+                <label class="form-label" for="password">Password</label>
+                <input
+                    class="form-input"
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Your password"
+                    autocomplete="current-password"
+                    required
+                >
+                <!-- Single error shown below password — deliberately vague for security -->
+                {% if error %}
+                <span class="form-error">{{ error }}</span>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="auth-btn">Sign In</button>
+
+        </form>
+
+        <p class="auth-switch">
+            No account yet?
+            <a href="/signup" class="auth-switch-link">Create one</a>
+        </p>
+
+    </div>
+</main>
+{% endblock %}

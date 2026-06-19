@@ -1,0 +1,1245 @@
+/* ── Reset and base ─────────────────────────────────────── */
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --black:        #070710;
+    --bg:           #0a0a14;
+    --gold:         #d4af37;
+    --gold-dim:     rgba(212, 175, 55, 0.18);
+    --gold-border:  rgba(212, 175, 55, 0.28);
+    --mars-red:     #c1440e;
+    --text-warm:    #e8dcc8;
+    --text-mid:     #a89880;
+    --text-dim:     rgba(232, 220, 200, 0.4);
+    --glass-bg:     rgba(12, 10, 24, 0.72);
+    --sidebar-w:    260px;
+    --card-max:     680px;
+}
+
+html, body {
+    width: 100%;
+    min-height: 100%;
+    background-color: var(--bg);
+    color: var(--text-warm);
+    font-family: 'Inter', sans-serif;
+}
+
+a { text-decoration: none; color: inherit; }
+button { border: none; background: none; cursor: pointer; font-family: inherit; }
+ul { list-style: none; }
+
+/* ── Atmospheric background — dark Martian glow at the edges ── */
+.atmo-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    /* a deep warm radial glow — like heat radiating off Martian rock */
+    background:
+        radial-gradient(ellipse 80% 60% at 50% 100%, rgba(193, 68, 14, 0.10) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 40% at 15% 50%,  rgba(80,  20, 80,  0.07) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 50% at 85% 20%,  rgba(20,  40, 100, 0.06) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+/* ── Sidebar toggle button ──────────────────────────────── */
+.toggle-btn {
+    position: fixed;
+    top: 1.1rem;
+    left: 1.1rem;
+    z-index: 300;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: var(--glass-bg);
+    border: 1px solid var(--gold-border);
+    color: var(--gold);
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, border-color 0.2s;
+    backdrop-filter: blur(8px);
+}
+
+.toggle-btn:hover {
+    background: rgba(212, 175, 55, 0.12);
+    border-color: var(--gold);
+}
+
+/* ── Sidebar panel ──────────────────────────────────────── */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: var(--sidebar-w);
+    z-index: 200;
+    /* hidden off-screen by default; slides in when .open is added */
+    transform: translateX(calc(-1 * var(--sidebar-w)));
+    transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    border-right: 1px solid var(--gold-border);
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem 0;
+}
+
+.sidebar.open {
+    transform: translateX(0);
+}
+
+/* Brand section at the top of the sidebar */
+.sidebar-brand {
+    /* left padding clears the toggle button (40px wide at 1.1rem from left) */
+    padding: 0.5rem 1.5rem 1.8rem 3.8rem;
+    border-bottom: 1px solid var(--gold-border);
+    margin-bottom: 0.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.brand-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.35em;
+    color: var(--gold);
+    text-shadow: 0 0 16px rgba(212, 175, 55, 0.4);
+}
+
+.brand-sub {
+    font-family: 'Cinzel', serif;
+    font-size: 0.58rem;
+    letter-spacing: 0.6em;
+    color: var(--text-mid);
+}
+
+/* Nav list */
+.nav-list {
+    flex: 1;
+    padding: 0 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+/* Each nav item row */
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.7rem 0.9rem;
+    border-radius: 8px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.15em;
+    color: var(--text-mid);
+    transition: background 0.18s, color 0.18s;
+    text-align: left;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    background: var(--gold-dim);
+    color: var(--gold);
+}
+
+.nav-icon {
+    font-size: 1rem;
+    width: 1.2rem;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+/* Chevron on the Colors button — rotates when open */
+.chevron {
+    margin-left: auto;
+    font-size: 1rem;
+    transition: transform 0.25s ease;
+    color: var(--text-dim);
+}
+
+.chevron.rotated {
+    transform: rotate(90deg);
+}
+
+/* Colors submenu — slides open/closed */
+.colors-submenu {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    padding-left: 2.6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    margin-top: 0.2rem;
+}
+
+.colors-submenu.open {
+    max-height: 400px; /* large enough to fit all items */
+}
+
+/* Individual color entry in the submenu */
+.color-link {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.45rem 0.5rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.1em;
+    color: var(--text-mid);
+    transition: background 0.15s, color 0.15s;
+}
+
+.color-link:hover {
+    background: var(--gold-dim);
+    color: var(--text-warm);
+}
+
+/* Small circle showing the Color's actual colour */
+.color-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    opacity: 0.85;
+}
+
+/* Multi-color gradient dot for "Others" */
+.others-dot {
+    background: linear-gradient(135deg, #e75480, #4a90e2, #50c878, #ffd700);
+}
+
+/* Thin divider above the "Others" entry */
+.others-divider {
+    padding: 0.5rem 0.5rem 0.2rem;
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    border-top: 1px solid var(--gold-border);
+    margin-top: 0.3rem;
+}
+
+/* Footer links at the bottom of the sidebar */
+.sidebar-footer {
+    padding: 1rem 1.5rem 0.5rem;
+    border-top: 1px solid var(--gold-border);
+    font-size: 0.72rem;
+    color: var(--text-mid);
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.12em;
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.footer-link:hover { color: var(--gold); }
+.footer-sep { color: var(--text-dim); }
+
+/* ── Dim overlay behind open sidebar ── */
+.sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 150;
+    background: rgba(0, 0, 0, 0.55);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.sidebar-overlay.visible {
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* ── Main content area ──────────────────────────────────── */
+.main-content {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5rem 1.5rem 3rem;
+}
+
+/* ── Quote card ─────────────────────────────────────────── */
+.quote-card {
+    width: 100%;
+    max-width: var(--card-max);
+    background: var(--glass-bg);
+    backdrop-filter: blur(14px);
+    border: 1px solid var(--gold-border);
+    border-radius: 16px;
+    padding: 3rem 3.5rem;
+    box-shadow:
+        0 0 60px rgba(193, 68, 14, 0.07),
+        0 4px 40px rgba(0, 0, 0, 0.5),
+        inset 0 0 60px rgba(212, 175, 55, 0.02);
+    /* card fades in smoothly when the page loads */
+    animation: card-appear 0.9s ease both;
+}
+
+@keyframes card-appear {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Quote marks are decorative watermarks — positioned absolute so they never push text */
+/* They render behind the text (z-index lower than normal flow), like a watermark */
+.quote-mark {
+    position: absolute;
+    font-family: 'Playfair Display', serif;
+    font-size: 7rem;
+    line-height: 1;
+    color: var(--gold);
+    opacity: 0.12;
+    user-select: none;
+    pointer-events: none;
+}
+
+/* Top-left corner of the card padding area */
+.open-quote {
+    top: 0.6rem;
+    left: 1.8rem;
+}
+
+/* Bottom-right corner — sits within the card border, never overlaps text */
+.close-quote {
+    bottom: 0.6rem;
+    right: 1.8rem;
+}
+
+/* The quote text — large, italic, readable */
+.quote-text {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+    line-height: 1.8;
+    color: var(--text-warm);
+    letter-spacing: 0.01em;
+    margin: 0.75rem 0;
+}
+
+/* Thin gold divider between quote and metadata */
+.card-divider {
+    border: none;
+    border-top: 1px solid var(--gold-border);
+    margin: 1.6rem 0 1.2rem;
+}
+
+/* Speaker name and book/chapter/page */
+.quote-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.quote-speaker {
+    font-family: 'Cinzel', serif;
+    font-size: 0.88rem;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+}
+
+.quote-source {
+    font-size: 0.75rem;
+    color: var(--text-mid);
+    letter-spacing: 0.06em;
+    font-family: 'Inter', sans-serif;
+    font-weight: 300;
+}
+
+/* ── Reactions row ──────────────────────────────────────── */
+.reactions-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 1.8rem;
+    flex-wrap: wrap;
+}
+
+.reaction-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.9rem;
+    border-radius: 999px; /* pill shape */
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-mid);
+    font-size: 0.8rem;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.reaction-btn:hover {
+    background: var(--gold-dim);
+    border-color: var(--gold-border);
+    color: var(--text-warm);
+}
+
+.reaction-emoji { font-size: 1rem; }
+.reaction-count { font-size: 0.78rem; font-family: 'Inter', sans-serif; }
+
+/* Total likes counter — separated to the right */
+.like-total {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.8rem;
+    color: var(--text-mid);
+    font-family: 'Inter', sans-serif;
+}
+
+.like-total span:first-child {
+    color: var(--mars-red);
+    font-size: 0.9rem;
+}
+
+/* ── Comment section ────────────────────────────────────── */
+.comments-section {
+    margin-top: 2rem;
+    border-top: 1px solid var(--gold-border);
+    padding-top: 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+.comments-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.25em;
+    color: var(--text-mid);
+    font-weight: 400;
+    text-transform: uppercase;
+}
+
+/* Comment input row — locked until auth is wired in Step 4 */
+.comment-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.comment-input-wrap:hover {
+    border-color: var(--gold-border);
+}
+
+.comment-placeholder {
+    flex: 1;
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    font-family: 'Inter', sans-serif;
+    user-select: none;
+}
+
+.comment-submit {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    padding: 0.3rem 0.8rem;
+    border: 1px solid var(--gold-border);
+    border-radius: 6px;
+    opacity: 0.6;
+}
+
+/* Auth notice — shown when unauthenticated user clicks a locked action */
+.auth-notice {
+    display: none; /* shown by JS */
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.78rem;
+    color: var(--text-mid);
+    background: rgba(193, 68, 14, 0.08);
+    border: 1px solid rgba(193, 68, 14, 0.25);
+    border-radius: 8px;
+    padding: 0.65rem 1rem;
+    font-family: 'Inter', sans-serif;
+}
+
+.auth-notice.visible {
+    display: flex;
+}
+
+.auth-notice-link {
+    margin-left: auto;
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    color: var(--gold);
+}
+
+.auth-notice-link:hover {
+    text-decoration: underline;
+}
+
+/* ── Active color link in sidebar ──────────────────────────────────────── */
+/* Highlights the currently viewed color in the Colors dropdown */
+.color-link-active {
+    background: var(--gold-dim) !important;
+    color: var(--gold) !important;
+}
+
+/* ── Color page layout ──────────────────────────────────────────────────── */
+/* Overrides main-content to stack vertically for multi-section color pages */
+.main-content.color-page {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    padding-top: 4.5rem;
+    padding-left: clamp(1.5rem, 5vw, 4rem);
+    padding-right: clamp(1.5rem, 5vw, 4rem);
+    padding-bottom: 4rem;
+    max-width: 960px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* ── Color page header ─────────────────────────────────────────────────── */
+.color-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--gold-border);
+}
+
+/* Large color circle in the header */
+.color-header-dot {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* Color name — glows in its own hue via --color-accent CSS variable */
+.color-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: var(--color-accent, var(--gold));
+    text-shadow: 0 0 30px var(--color-accent, rgba(212, 175, 55, 0.4));
+    line-height: 1.1;
+}
+
+/* Caste label below the color name */
+.color-caste {
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.35em;
+    color: var(--text-mid);
+    text-transform: uppercase;
+    margin-top: 0.4rem;
+}
+
+/* ── Color description paragraph ──────────────────────────────────────── */
+.color-description {
+    padding: 2rem 0 0.5rem;
+    max-width: 740px;
+}
+
+.color-description p {
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    line-height: 1.8;
+    color: var(--text-mid);
+}
+
+/* ── Section divider and heading ──────────────────────────────────────── */
+.section-divider {
+    border: none;
+    border-top: 1px solid var(--gold-border);
+    margin: 1.5rem 0 2rem;
+}
+
+.section-heading {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.3em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    font-weight: 400;
+    margin-bottom: 1.8rem;
+}
+
+/* ── Empty state — shown until Step 3 populates quotes ────────────────── */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    border: 1px dashed rgba(212, 175, 55, 0.15);
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.empty-icon {
+    font-size: 2rem;
+    color: var(--gold);
+    opacity: 0.2;
+}
+
+.empty-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.82rem;
+    letter-spacing: 0.25em;
+    color: var(--text-mid);
+    text-transform: uppercase;
+}
+
+.empty-sub {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    max-width: 380px;
+    line-height: 1.6;
+}
+
+/* ── Others page — header and grid ────────────────────────────────────── */
+/* Rainbow gradient dot for the Others header */
+.others-dot-large {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #d4af37, #e75480, #4a90e2, #50c878);
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+    flex-shrink: 0;
+}
+
+/* Rainbow gradient text for the Others title */
+.others-title {
+    background: linear-gradient(135deg, #d4af37 0%, #e75480 40%, #4a90e2 70%, #50c878 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none !important; /* gradient and text-shadow don't mix */
+}
+
+/* Grid of color cards — 2 per row on wide screens, 1 on mobile */
+.others-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.2rem;
+    padding-bottom: 2rem;
+}
+
+/* Each color description card on the Others page */
+.other-color-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--gold-border);
+    border-radius: 14px;
+    padding: 1.6rem 1.8rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.other-color-card:hover {
+    border-color: rgba(212, 175, 55, 0.45);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+}
+
+/* Color dot + name row inside each card */
+.other-color-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.9rem;
+}
+
+/* Larger dot on Others cards compared to sidebar dots */
+.color-dot-large {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.other-color-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.95rem;
+    letter-spacing: 0.2em;
+    font-weight: 600;
+}
+
+.other-color-desc {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.83rem;
+    line-height: 1.7;
+    color: var(--text-mid);
+}
+
+/* ── Submit a Quote — nav item with a "+" accent ─────────────────────────── */
+.nav-submit .nav-link {
+    margin-top: 0.6rem;
+    border: 1px solid var(--gold-border);
+    border-radius: 8px;
+    color: var(--gold);
+}
+
+.nav-submit .nav-link:hover {
+    background: rgba(212, 175, 55, 0.12);
+}
+
+/* Registered username shown in sidebar footer */
+.footer-username {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    color: var(--gold);
+    flex: 1;
+}
+
+/* ── Perspective section on quote cards ─────────────────────────────────── */
+.perspective-section {
+    margin: 1.2rem 0 0;
+    padding: 1rem 1.2rem;
+    border-left: 2px solid var(--gold-border);
+    background: rgba(212, 175, 55, 0.04);
+    border-radius: 0 8px 8px 0;
+}
+
+.perspective-label {
+    display: block;
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    opacity: 0.7;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+}
+
+.perspective-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    line-height: 1.65;
+    color: var(--text-mid);
+    font-style: italic;
+}
+
+/* ── Comment section — real form replacing the old locked placeholder ─────── */
+.comment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.comment-input-wrap {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.75rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    transition: border-color 0.2s;
+    cursor: default; /* override old pointer cursor */
+}
+
+.comment-input-wrap:hover { border-color: var(--gold-border); }
+
+.comment-textarea {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    resize: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.83rem;
+    color: var(--text-warm);
+    line-height: 1.5;
+}
+
+.comment-textarea::placeholder { color: var(--text-dim); }
+
+.comment-char-count {
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    font-family: 'Inter', sans-serif;
+    text-align: right;
+}
+
+.comment-error {
+    font-size: 0.75rem;
+    color: var(--mars-red);
+    font-family: 'Inter', sans-serif;
+    padding: 0.3rem 0;
+}
+
+/* Comment list */
+.comment-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    margin-top: 0.8rem;
+}
+
+.comment-item {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.comment-header {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    margin-bottom: 0.3rem;
+}
+
+.comment-author {
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    color: var(--gold);
+}
+
+.comment-time {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.65rem;
+    color: var(--text-dim);
+}
+
+.comment-body {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.83rem;
+    line-height: 1.55;
+    color: var(--text-mid);
+}
+
+.no-comments, .comments-loading {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    text-align: center;
+    padding: 1rem 0;
+}
+
+/* ── Auth pages (signup, login) ─────────────────────────────────────────── */
+.auth-page {
+    align-items: center;
+    justify-content: center;
+    padding-top: 5rem;
+    padding-bottom: 3rem;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 460px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(14px);
+    border: 1px solid var(--gold-border);
+    border-radius: 16px;
+    padding: 2.5rem;
+    box-shadow: 0 4px 40px rgba(0,0,0,0.5);
+    animation: card-appear 0.7s ease both;
+}
+
+.auth-header { margin-bottom: 1.5rem; }
+
+.auth-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+}
+
+.auth-sub {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.82rem;
+    color: var(--text-mid);
+    margin-top: 0.4rem;
+}
+
+/* Username inspiration box on signup */
+.username-inspiration {
+    background: rgba(212, 175, 55, 0.05);
+    border: 1px solid var(--gold-border);
+    border-radius: 10px;
+    padding: 0.9rem 1.1rem;
+    margin-bottom: 1.5rem;
+}
+
+.inspiration-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+}
+
+.inspiration-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.78rem;
+    color: var(--text-mid);
+    line-height: 1.6;
+}
+
+.inspiration-text em { color: var(--text-warm); font-style: normal; }
+
+/* ── Shared form styles (auth + submit quote) ────────────────────────────── */
+.auth-form, .submit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.form-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: var(--text-mid);
+    text-transform: uppercase;
+}
+
+.form-input {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 0.7rem 0.9rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.88rem;
+    color: var(--text-warm);
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+}
+
+.form-input:focus { border-color: var(--gold-border); }
+.form-input::placeholder { color: var(--text-dim); }
+
+.form-textarea {
+    resize: vertical;
+    min-height: 80px;
+    line-height: 1.5;
+}
+
+.form-select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23a89880' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.9rem center;
+    padding-right: 2.2rem;
+}
+
+.form-select option { background: #0a0a14; color: var(--text-warm); }
+
+.has-error .form-input { border-color: rgba(193, 68, 14, 0.6); }
+
+.form-error {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.75rem;
+    color: #e05a20;
+}
+
+.char-hint {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.68rem;
+    color: var(--text-dim);
+}
+
+.required-star { color: var(--mars-red); margin-left: 0.2rem; }
+.optional-tag {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    margin-left: 0.5rem;
+}
+
+.auth-btn, .submit-quote-btn {
+    width: 100%;
+    padding: 0.85rem;
+    border-radius: 8px;
+    background: rgba(212, 175, 55, 0.12);
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 0.5rem;
+}
+
+.auth-btn:hover, .submit-quote-btn:hover {
+    background: rgba(212, 175, 55, 0.22);
+}
+
+.auth-switch {
+    text-align: center;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-top: 1.2rem;
+}
+
+.auth-switch-link { color: var(--gold); }
+.auth-switch-link:hover { text-decoration: underline; }
+
+/* Flash messages */
+.flash-msg {
+    border-radius: 8px;
+    padding: 0.7rem 1rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8rem;
+    margin-bottom: 1rem;
+}
+
+.flash-success {
+    background: rgba(80, 200, 120, 0.1);
+    border: 1px solid rgba(80, 200, 120, 0.3);
+    color: #50c878;
+}
+
+.flash-error, .flash-danger {
+    background: rgba(193, 68, 14, 0.1);
+    border: 1px solid rgba(193, 68, 14, 0.3);
+    color: #e05a20;
+}
+
+/* Reacted state — button glows when the user has clicked it this session */
+.reaction-btn.reacted {
+    background: var(--gold-dim);
+    border-color: var(--gold-border);
+}
+
+/* ── Admin panel styles ─────────────────────────────────────────────────── */
+.admin-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.stat-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--gold-border);
+    border-radius: 10px;
+    padding: 1rem;
+    text-align: center;
+    backdrop-filter: blur(8px);
+}
+
+.stat-card.stat-alert { border-color: rgba(193, 68, 14, 0.4); }
+
+.stat-num {
+    display: block;
+    font-family: 'Cinzel', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--gold);
+}
+
+.stat-label {
+    display: block;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.68rem;
+    color: var(--text-mid);
+    letter-spacing: 0.1em;
+    margin-top: 0.3rem;
+}
+
+.admin-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 0.5rem 0 1rem;
+}
+
+.admin-btn {
+    display: inline-block;
+    padding: 0.55rem 1.2rem;
+    border-radius: 8px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.15em;
+    border: 1px solid var(--gold-border);
+    background: var(--glass-bg);
+    color: var(--text-mid);
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+}
+
+.admin-btn:hover         { background: var(--gold-dim); color: var(--gold); }
+.admin-btn.admin-btn-alert { border-color: rgba(193,68,14,0.5); color: #e05a20; }
+.admin-btn.admin-btn-approve { border-color: rgba(80,200,120,0.4); color: #50c878; }
+.admin-btn.admin-btn-reject  { border-color: rgba(193,68,14,0.4); color: #e05a20; }
+
+.admin-link {
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    color: var(--gold);
+    text-decoration: none;
+}
+
+.admin-link:hover { text-decoration: underline; }
+
+.pending-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--gold-border);
+    border-radius: 12px;
+    padding: 1.2rem 1.4rem;
+    margin-bottom: 1rem;
+    backdrop-filter: blur(8px);
+}
+
+.banned-card { border-color: rgba(193, 68, 14, 0.3); opacity: 0.75; }
+
+.pending-text {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 0.92rem;
+    color: var(--text-warm);
+    line-height: 1.6;
+    margin-bottom: 0.6rem;
+}
+
+.pending-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.75rem;
+    color: var(--text-mid);
+}
+
+.pending-color-badge {
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    background: rgba(212, 175, 55, 0.1);
+    border: 1px solid var(--gold-border);
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+}
+
+.pending-source {
+    color: var(--text-dim);
+    font-size: 0.68rem;
+}
+
+.pending-perspective {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8rem;
+    color: var(--text-mid);
+    font-style: italic;
+    margin-top: 0.5rem;
+    padding-left: 0.75rem;
+    border-left: 2px solid var(--gold-border);
+}
+
+.pending-preview {
+    background: rgba(255,255,255,0.02);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.6rem;
+}
+
+.pending-actions {
+    display: flex;
+    gap: 0.6rem;
+    margin-top: 0.9rem;
+}
+
+/* ── Full responsiveness ─────────────────────────────────────────────────── */
+
+/* Tablet and smaller — reduce layout padding */
+@media (max-width: 768px) {
+    .main-content {
+        padding: 4.5rem 1rem 2rem;
+    }
+
+    .main-content.color-page {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .quote-card {
+        padding: 2rem 1.5rem;
+    }
+
+    .auth-card {
+        padding: 2rem 1.5rem;
+    }
+
+    .others-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .color-title {
+        font-size: clamp(1.6rem, 7vw, 2.5rem);
+    }
+}
+
+/* Mobile — single column, tighter spacing */
+@media (max-width: 480px) {
+    .quote-card {
+        padding: 1.5rem 1.2rem;
+    }
+
+    .quote-mark {
+        font-size: 3.5rem;
+    }
+
+    .quote-text {
+        font-size: 1rem;
+    }
+
+    .reactions-row {
+        gap: 0.4rem;
+    }
+
+    .reaction-btn {
+        padding: 0.35rem 0.65rem;
+    }
+
+    .auth-card {
+        padding: 1.5rem 1rem;
+        border-radius: 12px;
+    }
+
+    .others-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* On very small screens, hide the outer planets to keep Mars readable */
+    .mercury, .venus, .earth, .jupiter, .saturn {
+        display: none;
+    }
+}

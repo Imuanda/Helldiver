@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% block title %}Helldiver — Submit a Quote{% endblock %}
+
+{% block content %}
+<main class="main-content color-page">
+
+    <header class="color-header" style="--color-accent: var(--gold)">
+        <div class="color-header-dot" style="background: var(--gold); box-shadow: 0 0 20px var(--gold)"></div>
+        <div>
+            <h1 class="color-title" style="color: var(--gold)">Submit a Quote</h1>
+            <p class="color-caste">Share a line that stayed with you</p>
+        </div>
+    </header>
+
+    <div class="color-description">
+        <p>
+            Found a quote that hit different? Submit it here. Your submission will be reviewed
+            before it goes live. The quote, speaker, and book are required. Your perspective
+            is optional — but it's what makes the app human.
+        </p>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- Flash success message -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="flash-msg flash-{{ category }}" style="margin-bottom: 1.5rem;">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="/submit-quote" class="submit-form" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <!-- Quote text -->
+        <div class="form-group {% if errors.quote_text %}has-error{% endif %}">
+            <label class="form-label" for="quote_text">The Quote <span class="required-star">*</span></label>
+            <textarea
+                class="form-input form-textarea"
+                id="quote_text"
+                name="quote_text"
+                placeholder="Enter the exact quote as written in the book..."
+                maxlength="600"
+                rows="4"
+                required
+            >{{ form_data.get('quote_text', '') }}</textarea>
+            <span class="char-hint">20–600 characters</span>
+            {% if errors.quote_text %}
+            <span class="form-error">{{ errors.quote_text }}</span>
+            {% endif %}
+        </div>
+
+        <!-- Speaker -->
+        <div class="form-group {% if errors.speaker %}has-error{% endif %}">
+            <label class="form-label" for="speaker">Speaker / Author <span class="required-star">*</span></label>
+            <input
+                class="form-input"
+                type="text"
+                id="speaker"
+                name="speaker"
+                placeholder="e.g. Darrow of Lykos, Cassius au Bellona"
+                maxlength="100"
+                value="{{ form_data.get('speaker', '') }}"
+                required
+            >
+            <span class="char-hint">The character who said or wrote this.</span>
+            {% if errors.speaker %}
+            <span class="form-error">{{ errors.speaker }}</span>
+            {% endif %}
+        </div>
+
+        <!-- Book -->
+        <div class="form-group {% if errors.book %}has-error{% endif %}">
+            <label class="form-label" for="book">Book <span class="required-star">*</span></label>
+            <select class="form-input form-select" id="book" name="book" required>
+                <option value="" disabled {% if not form_data.get('book') %}selected{% endif %}>Select a book…</option>
+                {% for b in books %}
+                <option value="{{ b }}" {% if form_data.get('book') == b %}selected{% endif %}>{{ b }}</option>
+                {% endfor %}
+            </select>
+            {% if errors.book %}
+            <span class="form-error">{{ errors.book }}</span>
+            {% endif %}
+        </div>
+
+        <!-- Society Color — auto-detected where possible, manual fallback -->
+        <div class="form-group {% if errors.color %}has-error{% endif %}">
+            <label class="form-label" for="color">Society Color of the Speaker</label>
+            <select class="form-input form-select" id="color" name="color">
+                <option value="" {% if not form_data.get('color') %}selected{% endif %}>Auto-detect from speaker name (or select manually)</option>
+                {% for c in colors %}
+                <option value="{{ c }}" {% if form_data.get('color') == c %}selected{% endif %}>
+                    {{ c | capitalize }}
+                </option>
+                {% endfor %}
+            </select>
+            <span class="char-hint">Leave blank to let us detect it automatically.</span>
+            {% if errors.color %}
+            <span class="form-error">{{ errors.color }}</span>
+            {% endif %}
+        </div>
+
+        <!-- Perspective — optional -->
+        <div class="form-group {% if errors.perspective %}has-error{% endif %}">
+            <label class="form-label" for="perspective">
+                Why do you love this quote?
+                <span class="optional-tag">optional</span>
+            </label>
+            <textarea
+                class="form-input form-textarea"
+                id="perspective"
+                name="perspective"
+                placeholder="Share what this quote means to you — why it stuck, what it made you feel, how it connects to the story..."
+                maxlength="400"
+                rows="3"
+            >{{ form_data.get('perspective', '') }}</textarea>
+            <span class="char-hint">0–400 characters</span>
+            {% if errors.perspective %}
+            <span class="form-error">{{ errors.perspective }}</span>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="auth-btn submit-quote-btn">Submit Quote</button>
+
+    </form>
+
+</main>
+{% endblock %}

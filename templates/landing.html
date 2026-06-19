@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Helldiver</title>
+
+    <!-- Cinzel: Roman-imperial feel for titles | Playfair: elegant serif for quotes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Playfair+Display:ital,wght@1,400;1,600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+</head>
+<body>
+
+    <!-- Canvas fills the entire background with animated twinkling stars -->
+    <canvas id="star-canvas"></canvas>
+
+    <!-- Soft nebula gradient — adds depth and colour to the void -->
+    <div class="nebula"></div>
+
+    <!-- App title at the top of the screen -->
+    <div class="title-overlay hide-on-zoom">
+        <h1 class="site-title">HELLDIVER</h1>
+        <!-- Name extension — sits tight below the title, feels like part of the brand -->
+        <p class="site-name-ext">Red Rising Saga</p>
+        <p class="site-subtitle">Words that shaped the worlds</p>
+    </div>
+
+    <!-- Cassius au Bellona's last words from Lightbringer — verified quote -->
+    <div class="cassius-quote hide-on-zoom">
+        <p class="quote-text">&#8220;I am Cassius Bellona, son of Tiberius, son of Julia, brother of Darrow, Morning Knight of the Solar Republic, and my honor remains.&#8221;</p>
+    </div>
+
+    <!-- All planets positioned across the viewport -->
+    <div class="solar-system">
+
+        <!-- Inner planets — left side, smaller and more distant -->
+        <div class="planet mercury hide-on-zoom">
+            <span class="planet-label">Mercury</span>
+        </div>
+
+        <div class="planet venus hide-on-zoom">
+            <span class="planet-label">Venus</span>
+        </div>
+
+        <div class="planet earth hide-on-zoom">
+            <span class="planet-label">Earth</span>
+            <div class="moon"></div>
+        </div>
+
+        <!-- Mars — the main entry point, centered, largest inner planet -->
+        <!-- Clicking Mars triggers the zoom-into-Mars animation then loads /home -->
+        <div class="planet mars" id="mars">
+            <!-- Pulsing glow ring around Mars to draw the eye -->
+            <div class="mars-pulse"></div>
+            <span class="planet-label mars-label">Mars</span>
+        </div>
+
+        <!-- Click-to-enter hint — pulses below Mars -->
+        <div class="enter-hint hide-on-zoom">
+            <span>&#9660; click to enter &#9660;</span>
+        </div>
+
+        <!-- Outer planets — right side -->
+        <div class="planet jupiter hide-on-zoom">
+            <span class="planet-label">Jupiter</span>
+        </div>
+
+        <div class="planet saturn hide-on-zoom">
+            <!-- Saturn's ring rendered as a CSS pseudo-element in the stylesheet -->
+            <span class="planet-label">Saturn</span>
+        </div>
+
+    </div>
+
+    <!-- Red overlay that fills the screen during the Mars zoom transition -->
+    <div class="zoom-overlay" id="zoom-overlay"></div>
+
+    <script src="{{ url_for('static', filename='js/landing.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% block title %}Helldiver — Create Account{% endblock %}
+
+{% block content %}
+<main class="main-content auth-page">
+    <div class="auth-card">
+
+        <div class="auth-header">
+            <h1 class="auth-title">Join the Saga</h1>
+            <p class="auth-sub">Create an account to submit quotes to the collection.</p>
+        </div>
+
+        <!-- Username inspiration box — tells users what kinds of names they can use -->
+        <div class="username-inspiration">
+            <p class="inspiration-label">&#9670; Choose your identity</p>
+            <p class="inspiration-text">
+                Pick any name that speaks to you — a character from the books, a role like
+                <em>Howler</em>, <em>Lancer</em>, <em>Knight</em>, or <em>Praetor</em>,
+                a place like <em>Lykos</em> or <em>Olympia</em>, or something entirely
+                your own. Your username is all that will ever appear publicly.
+            </p>
+        </div>
+
+        <form method="POST" action="/signup" class="auth-form" novalidate>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="form-group {% if errors.username %}has-error{% endif %}">
+                <label class="form-label" for="username">Username</label>
+                <input
+                    class="form-input"
+                    type="text"
+                    id="username"
+                    name="username"
+                    placeholder="e.g. Howler_Seven, Darrow, Stoneside"
+                    maxlength="30"
+                    value="{{ request.form.get('username', '') }}"
+                    autocomplete="username"
+                    required
+                >
+                <span class="char-hint">3–30 characters</span>
+                {% if errors.username %}
+                <span class="form-error">{{ errors.username }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-group {% if errors.email %}has-error{% endif %}">
+                <label class="form-label" for="email">Email</label>
+                <input
+                    class="form-input"
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="your@email.com"
+                    value="{{ request.form.get('email', '') }}"
+                    autocomplete="email"
+                    required
+                >
+                <span class="char-hint">Never shown publicly.</span>
+                {% if errors.email %}
+                <span class="form-error">{{ errors.email }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-group {% if errors.password %}has-error{% endif %}">
+                <label class="form-label" for="password">Password</label>
+                <input
+                    class="form-input"
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Minimum 8 characters"
+                    autocomplete="new-password"
+                    required
+                >
+                {% if errors.password %}
+                <span class="form-error">{{ errors.password }}</span>
+                {% endif %}
+            </div>
+
+            <div class="form-group {% if errors.confirm_password %}has-error{% endif %}">
+                <label class="form-label" for="confirm_password">Confirm Password</label>
+                <input
+                    class="form-input"
+                    type="password"
+                    id="confirm_password"
+                    name="confirm_password"
+                    placeholder="Repeat your password"
+                    autocomplete="new-password"
+                    required
+                >
+                {% if errors.confirm_password %}
+                <span class="form-error">{{ errors.confirm_password }}</span>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="auth-btn">Create Account</button>
+
+        </form>
+
+        <p class="auth-switch">
+            Already have an account?
+            <a href="/login" class="auth-switch-link">Sign in</a>
+        </p>
+
+    </div>
+</main>
+{% endblock %}

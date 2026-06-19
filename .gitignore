@@ -1,0 +1,19 @@
+.env
+__pycache__/
+*.pyc
+/test-files/
+
+# SQLite database — generated at runtime, contains real user data, never commit
+*.db
+
+# Invalid quotes log — runtime log, not source code
+flagged_quotes.json
+
+# Python virtual environment
+redrising/
+
+# Owner guide — private operational document, must never be public
+OWNER_GUIDE.md
+
+# macOS system files
+.DS_Store
