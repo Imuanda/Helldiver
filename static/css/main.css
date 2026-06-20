@@ -246,6 +246,13 @@ ul { list-style: none; }
 .footer-link:hover { color: var(--gold); }
 .footer-sep { color: var(--text-dim); }
 
+/* Admin link — gold tint so it's clearly special, only admins ever see it */
+.admin-footer-link {
+    color: var(--gold);
+    opacity: 0.8;
+}
+.admin-footer-link:hover { opacity: 1; }
+
 /* ── Dim overlay behind open sidebar ── */
 .sidebar-overlay {
     position: fixed;

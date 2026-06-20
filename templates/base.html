@@ -101,6 +101,10 @@
         <div class="sidebar-footer">
             {% if current_user.is_authenticated %}
                 <span class="footer-username">&#9670; {{ current_user.username }}</span>
+                <!-- Admin link — only rendered when the logged-in user is an admin -->
+                {% if current_user.is_admin %}
+                <a href="/admin/" class="footer-link admin-footer-link">&#9965; Admin</a>
+                {% endif %}
                 <a href="/logout" class="footer-link">Sign Out</a>
             {% else %}
                 <a href="/login"  class="footer-link">Sign In</a>
