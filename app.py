@@ -178,8 +178,34 @@ def landing():
 @app.route('/home')
 def home():
     validated = Quote.query.filter_by(status='validated').all()
-    quote = random.choice(validated) if validated else None
-    return render_template('home.html', quote=quote, active_page='home')
+    if not validated:
+        return render_template('home.html', quote=None, quote_ids=[], active_page='home')
+    quote = random.choice(validated)
+    # Pass all IDs so the JS navigator knows the full sequence
+    quote_ids = [q.id for q in validated]
+    return render_template('home.html', quote=quote, quote_ids=quote_ids, active_page='home')
+
+
+@app.route('/api/quote/<int:quote_id>')
+def api_quote(quote_id):
+    """Returns a single validated quote as JSON — used by the swipe navigator."""
+    from flask import jsonify
+    quote = Quote.query.get_or_404(quote_id)
+    if quote.status != 'validated':
+        return jsonify({'error': 'Not found'}), 404
+    return jsonify({
+        'id':            quote.id,
+        'text':          quote.text,
+        'speaker':       quote.speaker,
+        'book':          quote.book,
+        'chapter':       quote.chapter,
+        'page':          quote.page,
+        'heart_count':   quote.heart_count,
+        'fire_count':    quote.fire_count,
+        'shocked_count': quote.shocked_count,
+        'likes':         quote.likes,
+        'perspective':   quote.perspective,
+    })
 
 
 @app.route('/colors/others')
@@ -197,6 +223,23 @@ def color_page(slug):
               .order_by(Quote.created_at.desc())
               .all())
     return render_template('color.html', color=color, quotes=quotes, active_page=slug.lower())
+
+
+# ── Maintenance mode ─────────────────────────────────────────────────────────
+# Create the file  ~/Helldiver/maintenance.flag  to put the site in maintenance.
+# Delete that file to bring it back. No code change or reload required.
+MAINTENANCE_FLAG = os.path.join(basedir, 'maintenance.flag')
+
+@app.before_request
+def check_maintenance():
+    if not os.path.exists(MAINTENANCE_FLAG):
+        return  # site is live — do nothing
+    # Admins can still browse normally while the site is "down"
+    if current_user.is_authenticated and current_user.is_admin:
+        return
+    # Everyone else sees the maintenance page
+    if request.endpoint not in ('static',):
+        return render_template('maintenance.html'), 503
 
 
 # ── CSRF exemptions — AJAX endpoints send JSON, not form tokens ───────────────

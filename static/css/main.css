@@ -1042,6 +1042,80 @@ ul { list-style: none; }
     border-color: var(--gold-border);
 }
 
+/* ── Quote navigator — wraps the card with prev/next arrows ─────────────── */
+.quote-navigator {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* The quote card transitions smoothly when navigating */
+#quote-card {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    flex: 1;
+    min-width: 0; /* prevents overflow in flex container */
+}
+
+/* Previous / Next arrow buttons */
+.nav-arrow {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--glass-bg);
+    border: 1px solid var(--gold-border);
+    color: var(--gold);
+    font-size: 1.8rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.15s, opacity 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(8px);
+}
+
+.nav-arrow:hover:not(:disabled) {
+    background: var(--gold-dim);
+}
+
+/* Quote position counter — e.g. "2 / 5" */
+.quote-counter {
+    text-align: center;
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--text-dim);
+    margin-top: 0.6rem;
+}
+
+/* On mobile, tuck the arrows above/below instead of beside */
+@media (max-width: 600px) {
+    .quote-navigator {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .nav-arrow {
+        width: 36px;
+        height: 36px;
+        font-size: 1.4rem;
+    }
+
+    /* Swap arrow order: prev on left, next on right, inline */
+    .quote-navigator {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    #quote-card { order: 1; width: 100%; }
+    .nav-prev   { order: 0; }
+    .nav-next   { order: 2; }
+}
+
 /* ── Admin panel styles ─────────────────────────────────────────────────── */
 .admin-stats {
     display: grid;

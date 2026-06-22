@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Helldiver — Back Soon</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Playfair+Display:ital@1&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            background: #050510;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Cinzel', serif;
+            color: #e8dcc8;
+        }
+
+        /* Subtle animated star field */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.6) 0%, transparent 100%),
+                radial-gradient(1px 1px at 30% 60%, rgba(255,255,255,0.5) 0%, transparent 100%),
+                radial-gradient(1px 1px at 50% 10%, rgba(255,255,255,0.7) 0%, transparent 100%),
+                radial-gradient(1px 1px at 70% 40%, rgba(255,255,255,0.4) 0%, transparent 100%),
+                radial-gradient(1px 1px at 80% 80%, rgba(255,255,255,0.6) 0%, transparent 100%),
+                radial-gradient(1px 1px at 20% 85%, rgba(255,255,255,0.5) 0%, transparent 100%),
+                radial-gradient(1px 1px at 90% 15%, rgba(255,255,255,0.6) 0%, transparent 100%),
+                radial-gradient(1px 1px at 60% 70%, rgba(255,255,255,0.4) 0%, transparent 100%),
+                radial-gradient(1px 1px at 40% 45%, rgba(255,255,255,0.5) 0%, transparent 100%),
+                radial-gradient(1px 1px at 15% 55%, rgba(255,255,255,0.3) 0%, transparent 100%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .card {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            max-width: 480px;
+            padding: 3rem 3.5rem;
+            background: rgba(12, 10, 24, 0.85);
+            border: 1px solid rgba(212, 175, 55, 0.25);
+            border-radius: 16px;
+            backdrop-filter: blur(12px);
+            animation: appear 0.8s ease both;
+        }
+
+        @keyframes appear {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Mars icon */
+        .mars-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 38% 32%, #e05a20, #c1440e 40%, #7a1f0a 75%, #3d0d04);
+            box-shadow: 0 0 30px rgba(193, 68, 14, 0.5);
+            margin: 0 auto 1.8rem;
+            animation: pulse 2.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 30px rgba(193, 68, 14, 0.5); }
+            50%       { box-shadow: 0 0 50px rgba(193, 68, 14, 0.8); }
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.25em;
+            color: #d4af37;
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 0.65rem;
+            letter-spacing: 0.4em;
+            color: rgba(212, 175, 55, 0.6);
+            text-transform: uppercase;
+            margin-bottom: 2rem;
+        }
+
+        .quote {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: 1rem;
+            line-height: 1.75;
+            color: rgba(232, 220, 200, 0.75);
+            margin-bottom: 2rem;
+        }
+
+        .message {
+            font-size: 0.72rem;
+            letter-spacing: 0.15em;
+            color: rgba(232, 220, 200, 0.4);
+            text-transform: uppercase;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="mars-icon"></div>
+        <h1>HELLDIVER</h1>
+        <p class="subtitle">Red Rising Saga</p>
+        <p class="quote">
+            &#8220;I am still becoming. I am still fighting.&#8221;
+        </p>
+        <p class="message">
+            The site is undergoing maintenance.<br>
+            We will be back shortly.
+        </p>
+    </div>
+</body>
+</html>
