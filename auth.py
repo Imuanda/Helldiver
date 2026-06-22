@@ -3,7 +3,7 @@ auth.py — Authentication blueprint.
 Handles signup, login, and logout.
 """
 
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app
 from flask_login import login_user, logout_user, login_required, current_user
 from extensions import db
 from models import User
@@ -58,6 +58,7 @@ def signup():
             user.set_password(password)
             db.session.add(user)
             db.session.commit()
+            current_app.logger.info(f'New user registered — username: {clean_username}')
             login_user(user)
             flash('Welcome to Red Rising. You can now submit quotes.', 'success')
             return redirect(url_for('home'))
@@ -79,11 +80,13 @@ def login():
         user = User.query.filter_by(email=email).first()
 
         if not user or not user.check_password(password):
-            # Deliberately vague — don't reveal whether email exists
+            current_app.logger.warning(f'Failed login attempt — email: {email}')
             error = 'Incorrect email or password.'
         elif user.is_banned:
+            current_app.logger.warning(f'Banned user login attempt — {user.username} ({email})')
             error = 'This account has been suspended.'
         else:
+            current_app.logger.info(f'User logged in — {user.username}')
             login_user(user)
             # Redirect to the page they were trying to reach, or home
             next_page = request.args.get('next') or url_for('home')

@@ -4,7 +4,7 @@ No login required — all interactions are tracked by session ID.
 """
 
 from datetime import datetime
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, jsonify, session, current_app
 from flask_login import current_user
 from extensions import db
 from models import Quote, Comment, Reaction
@@ -29,6 +29,7 @@ def react(quote_id):
 
     # Check ban
     if is_banned_session(anon_id):
+        current_app.logger.warning(f'Banned session attempted reaction — id: {anon_id[:8]}…')
         return jsonify({'error': 'Your session has been suspended.'}), 403
 
     # Look for an existing reaction of this type from this session
@@ -73,16 +74,18 @@ def add_comment(quote_id):
 
     # Check ban before doing anything
     if is_banned_session(anon_id):
+        current_app.logger.warning(f'Banned session attempted comment on quote {quote_id} — id: {anon_id[:8]}…')
         return jsonify({'error': 'Your session has been suspended.'}), 403
 
     text = request.json.get('text', '')
     cleaned, err = clean_and_validate(text, 'comment')
 
     if err:
-        # If rejected for profanity/abuse — auto-ban this session
         if 'inappropriate' in err:
             ban_session(anon_id, f'Profanity/abuse in comment: "{text[:80]}"')
+            current_app.logger.warning(f'Session auto-banned for profanity — id: {anon_id[:8]}…')
             return jsonify({'error': 'Inappropriate content detected. Your session has been suspended.'}), 403
+        current_app.logger.info(f'Comment rejected on quote {quote_id} — {err}')
         return jsonify({'error': err}), 400
 
     # Server-side idempotency — block identical comment from same session within 10 seconds

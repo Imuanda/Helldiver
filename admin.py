@@ -5,7 +5,7 @@ Access: /admin
 """
 
 from functools import wraps
-from flask import Blueprint, render_template, redirect, url_for, request, flash
+from flask import Blueprint, render_template, redirect, url_for, request, flash, current_app
 from flask_login import current_user, login_required
 from extensions import db
 from models import Quote, User, Comment, BanRecord
@@ -60,6 +60,7 @@ def approve_quote(quote_id):
     quote = Quote.query.get_or_404(quote_id)
     quote.status = 'validated'
     db.session.commit()
+    current_app.logger.info(f'Admin {current_user.username} approved quote {quote_id} — speaker: {quote.speaker}')
     flash(f'Quote by {quote.speaker} approved.', 'success')
     return redirect(url_for('admin.pending_quotes'))
 
@@ -70,6 +71,7 @@ def reject_quote(quote_id):
     quote = Quote.query.get_or_404(quote_id)
     quote.status = 'rejected'
     db.session.commit()
+    current_app.logger.info(f'Admin {current_user.username} rejected quote {quote_id} — speaker: {quote.speaker}')
     flash(f'Quote by {quote.speaker} rejected.', 'success')
     return redirect(url_for('admin.pending_quotes'))
 
@@ -162,6 +164,7 @@ def ban_user(user_id):
     record = BanRecord(user_id=user.id, reason=reason, banned_by=current_user.username)
     db.session.add(record)
     db.session.commit()
+    current_app.logger.warning(f'Admin {current_user.username} banned user {user.username} — reason: {reason}')
     flash(f'{user.username} has been banned.', 'success')
     return redirect(url_for('admin.users'))
 
@@ -173,5 +176,6 @@ def unban_user(user_id):
     user.is_banned  = False
     user.ban_reason = None
     db.session.commit()
+    current_app.logger.info(f'Admin {current_user.username} unbanned user {user.username}')
     flash(f'{user.username} has been unbanned.', 'success')
     return redirect(url_for('admin.users'))

@@ -15,5 +15,8 @@ redrising/
 # Owner guide — private operational document, must never be public
 OWNER_GUIDE.md
 
+# Application logs — runtime files, never committed
+logs/
+
 # macOS system files
 .DS_Store

@@ -1,7 +1,9 @@
 import os
 import random
-from dotenv import load_dotenv  # loads variables from .env into os.environ
-load_dotenv()                   # call this before anything reads os.environ
+import logging
+from logging.handlers import RotatingFileHandler
+from dotenv import load_dotenv
+load_dotenv()
 
 from flask import Flask, render_template, redirect, url_for, request
 from flask_login import LoginManager, current_user
@@ -32,6 +34,25 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # SECRET_KEY must be set as an environment variable in production
 # Render auto-generates one via render.yaml — never commit a real key to git
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-change-before-production')
+
+# ── Application logging ───────────────────────────────────────────────────────
+# Writes structured logs to logs/app.log — rotates at 1 MB, keeps 5 old files
+logs_dir = os.path.join(basedir, 'logs')
+os.makedirs(logs_dir, exist_ok=True)
+
+_handler = RotatingFileHandler(
+    os.path.join(logs_dir, 'app.log'),
+    maxBytes=1_000_000,   # 1 MB per file
+    backupCount=5,        # keep up to 5 rotated files (5 MB total max)
+    encoding='utf-8',
+)
+_handler.setFormatter(logging.Formatter(
+    '%(asctime)s [%(levelname)s] %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S',
+))
+_handler.setLevel(logging.INFO)
+app.logger.addHandler(_handler)
+app.logger.setLevel(logging.INFO)
 
 # ── Extensions ────────────────────────────────────────────────────────────────
 db.init_app(app)
@@ -275,16 +296,17 @@ def set_security_headers(response):
 # ── Graceful error pages ──────────────────────────────────────────────────────
 @app.errorhandler(404)
 def not_found(e):
+    app.logger.warning(f'404 — {request.method} {request.path}')
     return render_template('404.html', active_page=''), 404
 
 @app.errorhandler(500)
 def server_error(e):
-    app.logger.error(f'Server error: {e}')
+    app.logger.error(f'500 — {request.method} {request.path} — {e}')
     return render_template('500.html', active_page=''), 500
 
 @app.errorhandler(429)
 def rate_limited(e):
-    # Return JSON for API callers, friendly page for browser users
+    app.logger.warning(f'429 rate limit hit — {request.method} {request.path}')
     if request.accept_mimetypes.accept_json:
         from flask import jsonify as _jsonify
         return _jsonify({'error': 'Too many requests — please slow down.'}), 429

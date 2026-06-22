@@ -3,7 +3,7 @@ submit.py — Quote submission blueprint.
 Login required. Submitted quotes go to 'pending' status for owner review.
 """
 
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
 from flask_login import login_required, current_user
 from extensions import db
 from models import Quote
@@ -61,7 +61,7 @@ def submit_quote():
             errors['color'] = 'Please select the Society Color of the speaker.'
 
         if not errors:
-            # ── Run through the validation pipeline ───────────────────────
+            # Log validation failures so the owner can see what's being rejected and why
             is_valid, reason, _ = validate_quote(
                 text=cleaned_text,
                 speaker=cleaned_speaker,
@@ -71,6 +71,9 @@ def submit_quote():
             )
 
             if not is_valid:
+                current_app.logger.warning(
+                    f'Quote submission failed validation — user: {current_user.username}, reason: {reason}'
+                )
                 errors['quote_text'] = reason
 
         if not errors:
@@ -95,6 +98,10 @@ def submit_quote():
             db.session.add(quote)
             db.session.commit()
 
+            current_app.logger.info(
+                f'Quote submitted by user {current_user.id} ({current_user.username}) — '
+                f'speaker: {cleaned_speaker}, book: {raw_book}, color: {final_color}'
+            )
             flash('Your quote has been submitted and is pending review. Thank you!', 'success')
             return redirect(url_for('home'))
 
