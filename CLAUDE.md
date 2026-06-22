@@ -230,6 +230,44 @@ A dedicated pass to harden the app before it could ever go public.
 
 ---
 
+## Database Access Policy — Strict Guardrails for Claude
+
+The database contains real user data: emails, usernames, passwords (hashed), comments, and session IDs.
+This data belongs to the users and must be treated with maximum caution.
+
+### What Claude is NEVER allowed to do without explicit owner authorization:
+
+- Write, suggest, or run any query that **deletes user records** (`DELETE FROM users`)
+- Write, suggest, or run any query that **modifies a user's email or password**
+- Write any script that **bulk-modifies or bulk-deletes** rows in any table
+- **Read or display** any user's personal data (email, session ID) beyond what's necessary for the immediate task
+- Make any **direct change to the live database** — all database changes go through the app's own routes and admin panel
+
+### Before touching ANYTHING database-related, Claude must state:
+
+1. **WHAT** — exactly which table, which columns, and how many rows will be affected
+2. **WHY** — the reason this change is needed
+3. **WHO requested it** — the owner must have explicitly asked for this in the current conversation
+
+If the request did not come directly and clearly from the owner in this session, Claude must ask for confirmation before proceeding.
+
+### What is approved without special authorization (normal development work):
+- Adding new columns or tables via `models.py` (schema changes, not data changes)
+- Reading data to display it in templates or the admin panel
+- Changes to the `quotes` table for adding/approving/rejecting quotes — this is the core function
+- Changes to the `ban_records` table when the owner explicitly requests a ban action
+
+### What always requires a clear "yes, do it" from the owner:
+- Any deletion of user accounts or their associated data
+- Any modification of user emails, usernames, or password hashes
+- Any bulk operation that touches more than one user's records at once
+- Running raw SQL against the database outside of normal app operations
+
+When in doubt, stop and ask. The cost of asking is low. The cost of modifying someone's personal data without authorization is not.
+
+
+---
+
 ## Conventions
 - Break the project into small files that each serve one specific purpose — never write the whole project in one file
 - Add short, clear comments to every piece of code — one line is fine, but write them like explaining to a 5-year-old
