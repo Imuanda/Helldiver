@@ -11,7 +11,6 @@ it touches the database. This handles:
      themes. The owner reviews every quote before it goes live.
 """
 
-import html
 from better_profanity import profanity
 
 # ── Targeted word list for user-generated content (comments and perspectives) ─
@@ -52,10 +51,16 @@ NO_FILTER_FIELDS = {'quote_text', 'speaker'}
 
 
 def sanitize_text(text):
-    """Strip whitespace and escape HTML characters to prevent XSS attacks."""
+    """
+    Strip whitespace from user input.
+    We do NOT call html.escape() here because Jinja2 auto-escapes all {{ variables }}
+    at render time, and quote-nav.js uses .textContent (not innerHTML) for AJAX.
+    Escaping on input AND output causes double-escaping: apostrophes show as &#x27;,
+    ampersands show as &amp; etc. Jinja2 handles output escaping — we handle trimming.
+    """
     if not text:
         return ''
-    return html.escape(text.strip(), quote=True)
+    return text.strip()
 
 
 def check_length(text, field):

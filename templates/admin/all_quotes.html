@@ -1,14 +1,13 @@
 {% extends 'base.html' %}
-{% block title %}Helldiver — Pending Quotes{% endblock %}
+{% block title %}Helldiver — All Live Quotes{% endblock %}
 
 {% block content %}
 <main class="main-content color-page">
-
     <header class="color-header" style="--color-accent: var(--gold)">
         <div class="color-header-dot" style="background:var(--gold)"></div>
         <div>
-            <h1 class="color-title" style="color:var(--gold)">Pending Quotes</h1>
-            <p class="color-caste">{{ quotes|length }} awaiting review</p>
+            <h1 class="color-title" style="color:var(--gold)">Live Quotes</h1>
+            <p class="color-caste">{{ quotes|length }} validated quote{{ 's' if quotes|length != 1 }}</p>
         </div>
     </header>
 
@@ -18,16 +17,14 @@
         {% endfor %}{% endif %}
     {% endwith %}
 
-    <div style="margin-top:1rem">
-        <a href="/admin" class="admin-link">&larr; Back to Dashboard</a>
-    </div>
+    <div style="margin-top:1rem"><a href="/admin" class="admin-link">&larr; Back to Dashboard</a></div>
     <hr class="section-divider">
 
     {% if not quotes %}
     <div class="empty-state">
         <div class="empty-icon">&#9670;</div>
-        <p class="empty-title">All clear</p>
-        <p class="empty-sub">No quotes are waiting for review.</p>
+        <p class="empty-title">No live quotes yet</p>
+        <p class="empty-sub">Approved quotes will appear here.</p>
     </div>
     {% endif %}
 
@@ -40,27 +37,18 @@
             {% if q.chapter %}<span>&middot; Ch. {{ q.chapter }}</span>{% endif %}
             {% if q.page %}<span>&middot; p.{{ q.page }}</span>{% endif %}
             <span class="pending-color-badge">{{ q.color }}</span>
-            <span class="pending-source">source: {{ q.source }}</span>
+            <span class="pending-source">&#9829; {{ q.likes }}</span>
         </div>
         {% if q.perspective %}
         <p class="pending-perspective">&#128172; {{ q.perspective }}</p>
         {% endif %}
         <div class="pending-actions">
-            <form method="POST" action="/admin/quotes/{{ q.id }}/approve" style="display:inline">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="admin-btn admin-btn-approve">&#10003; Approve</button>
-            </form>
-            <form method="POST" action="/admin/quotes/{{ q.id }}/reject" style="display:inline">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="admin-btn admin-btn-reject">&#10007; Reject</button>
-            </form>
             <form method="POST" action="/admin/quotes/{{ q.id }}/delete"
-                  style="display:inline"
-                  onsubmit="return confirm('Permanently delete this quote? This cannot be undone.')">
+                  onsubmit="return confirm('Permanently delete this live quote? It will disappear from the site immediately.')">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <input type="hidden" name="from" value="pending">
+                <input type="hidden" name="from" value="all">
                 <button type="submit" class="admin-btn" style="color:#c0392b; border-color:rgba(192,57,43,0.4)">
-                    &#128465; Delete
+                    &#128465; Delete permanently
                 </button>
             </form>
         </div>

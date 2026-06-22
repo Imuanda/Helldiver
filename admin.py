@@ -144,6 +144,35 @@ def add_quote():
 
 
 # ── Users list ────────────────────────────────────────────────────────────────
+@admin_bp.route('/quotes/<int:quote_id>/delete', methods=['POST'])
+@admin_required
+def delete_quote(quote_id):
+    quote = Quote.query.get_or_404(quote_id)
+    speaker = quote.speaker
+    came_from = request.form.get('from', 'pending')
+    db.session.delete(quote)
+    db.session.commit()
+    current_app.logger.info(
+        f'Admin {current_user.username} DELETED quote {quote_id} — speaker: {speaker}'
+    )
+    flash(f'Quote by {speaker} has been permanently deleted.', 'success')
+    # Return to wherever the admin was (pending page or all-quotes page)
+    if came_from == 'all':
+        return redirect(url_for('admin.all_quotes'))
+    return redirect(url_for('admin.pending_quotes'))
+
+
+@admin_bp.route('/quotes')
+@admin_required
+def all_quotes():
+    """Shows every validated (live) quote with an option to delete."""
+    quotes = (Quote.query
+              .filter_by(status='validated')
+              .order_by(Quote.created_at.desc())
+              .all())
+    return render_template('admin/all_quotes.html', quotes=quotes)
+
+
 @admin_bp.route('/users')
 @admin_required
 def users():
