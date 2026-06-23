@@ -15,6 +15,12 @@ redrising/
 # Owner guide — private operational document, must never be public
 OWNER_GUIDE.md
 
+# Private security workbook (Claude's reference for security features)
+PRIVATE_WORKBOOK.md
+
+# Security vulnerability assessment report (confidential)
+SECURITY_VULNERABILITY_REPORT.md
+
 # Application logs — runtime files, never committed
 logs/
 

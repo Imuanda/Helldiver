@@ -230,6 +230,13 @@ A dedicated pass to harden the app before it could ever go public.
 
 ---
 
+## Additional Context
+
+See `PRIVATE_WORKBOOK.md` for supplementary operational context. (Gitignored — local only.)
+
+
+---
+
 ## Database Access Policy — Strict Guardrails for Claude
 
 The database contains real user data: emails, usernames, passwords (hashed), comments, and session IDs.
