@@ -74,7 +74,7 @@ login_manager = LoginManager(app)
 login_manager.login_view     = 'auth.login'
 login_manager.login_message  = 'Please sign in to submit a quote.'
 
-from models import Quote, User, DailyVisit  # import after db is bound to app
+from models import Quote, User, DailyVisit, LandingQuote  # import after db is bound to app
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -195,7 +195,17 @@ OTHERS = [
 
 @app.route('/')
 def landing():
-    return render_template('landing.html')
+    # Load the active intro quote — fall back to Cassius's quote if none is set
+    intro = LandingQuote.query.filter_by(is_active=True).first()
+    if not intro:
+        # Default fallback so the page is never blank
+        class _Default:
+            text   = ('I am Cassius Bellona, son of Tiberius, son of Julia, '
+                      'brother of Darrow, Morning Knight of the Solar Republic, '
+                      'and my honor remains.')
+            author = 'Cassius au Bellona · Lightbringer'
+        intro = _Default()
+    return render_template('landing.html', intro=intro)
 
 
 @app.route('/home')

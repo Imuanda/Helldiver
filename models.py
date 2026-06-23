@@ -123,6 +123,23 @@ class Reaction(db.Model):
         return f'<Reaction {self.type} on Quote {self.quote_id}>'
 
 
+# ── LandingQuote ─────────────────────────────────────────────────────────────
+class LandingQuote(db.Model):
+    """The quote displayed on the star map landing page — managed by admin."""
+    __tablename__ = 'landing_quotes'
+
+    id         = db.Column(db.Integer, primary_key=True)
+    text       = db.Column(db.String(600), nullable=False)
+    # Optional attribution shown below the quote (e.g. "Cassius au Bellona · Lightbringer")
+    author     = db.Column(db.String(150), nullable=True)
+    # Only one row should have is_active=True at any time
+    is_active  = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<LandingQuote {self.id}: active={self.is_active}>'
+
+
 # ── Suggestion ───────────────────────────────────────────────────────────────
 class Suggestion(db.Model):
     """Feature suggestion submitted by a registered user — visible only to admin."""

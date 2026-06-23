@@ -28,9 +28,12 @@
         <p class="site-subtitle">Words that shaped the worlds</p>
     </div>
 
-    <!-- Cassius au Bellona's last words from Lightbringer — verified quote -->
+    <!-- Intro quote — managed by admin at /admin/landing-quote -->
     <div class="cassius-quote hide-on-zoom">
-        <p class="quote-text">&#8220;I am Cassius Bellona, son of Tiberius, son of Julia, brother of Darrow, Morning Knight of the Solar Republic, and my honor remains.&#8221;</p>
+        <p class="quote-text">{{ intro.text }}</p>
+        {% if intro.author %}
+        <p class="intro-author">&#8212; {{ intro.author }}</p>
+        {% endif %}
     </div>
 
     <!-- All planets positioned across the viewport -->

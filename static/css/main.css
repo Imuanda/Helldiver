@@ -1235,6 +1235,12 @@ ul { list-style: none; }
     font-size: 0.68rem;
 }
 
+/* Active landing quote card — gold border highlight */
+.active-landing-card {
+    border-color: rgba(212, 175, 55, 0.5);
+    background: rgba(212, 175, 55, 0.04);
+}
+
 .pending-perspective {
     font-family: 'Inter', sans-serif;
     font-size: 0.8rem;

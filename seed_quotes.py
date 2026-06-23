@@ -27,7 +27,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 
 from app import app
 from extensions import db
-from models import Quote
+from models import Quote, LandingQuote
 from validation import validate_quote
 
 # ── Initial quotes ────────────────────────────────────────────────────────────
@@ -120,6 +120,23 @@ def seed():
 
         db.session.commit()
         print(f'\nDone. {added} quote(s) added, {skipped} skipped.')
+
+        # ── Seed the initial landing page quote ───────────────────────────────
+        if not LandingQuote.query.first():
+            landing_q = LandingQuote(
+                text=(
+                    'I am Cassius Bellona, son of Tiberius, son of Julia, '
+                    'brother of Darrow, Morning Knight of the Solar Republic, '
+                    'and my honor remains.'
+                ),
+                author='Cassius au Bellona · Lightbringer',
+                is_active=True,
+            )
+            db.session.add(landing_q)
+            db.session.commit()
+            print('  [landing]  Seeded initial intro quote (Cassius).')
+        else:
+            print('  [landing]  Intro quote already set — skipping.')
 
         if added > 0:
             print('\nTo see quotes live:')

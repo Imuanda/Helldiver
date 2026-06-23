@@ -111,7 +111,15 @@ html, body {
     text-shadow: 0 0 20px rgba(232, 220, 200, 0.15);
 }
 
-/* .quote-attr removed — Cassius quote displays text only, no attribution */
+/* Optional author attribution shown below the intro quote */
+.intro-author {
+    margin-top: 0.85rem;
+    font-size: clamp(0.6rem, 1.1vw, 0.75rem);
+    color: var(--gold);
+    letter-spacing: 0.22em;
+    opacity: 0.65;
+    font-family: 'Cinzel', serif;
+}
 
 /* ── Solar system container — full screen, planets absolute inside ── */
 .solar-system {

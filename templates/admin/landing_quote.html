@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block title %}Helldiver — Intro Quote Manager{% endblock %}
+
+{% block content %}
+<main class="main-content color-page">
+
+    <header class="color-header" style="--color-accent: var(--gold)">
+        <div class="color-header-dot" style="background:var(--gold)"></div>
+        <div>
+            <h1 class="color-title" style="color:var(--gold)">Intro Quote</h1>
+            <p class="color-caste">What visitors read on the star map</p>
+        </div>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}{% for cat, msg in messages %}
+        <div class="flash-msg flash-{{ cat }}" style="margin:1rem 0">{{ msg }}</div>
+        {% endfor %}{% endif %}
+    {% endwith %}
+
+    <div style="margin-top:1rem"><a href="/admin" class="admin-link">&larr; Back to Dashboard</a></div>
+    <hr class="section-divider">
+
+    <!-- Currently live -->
+    {% if active %}
+    <h2 class="section-heading">Currently Live</h2>
+    <div class="pending-card" style="border-color: rgba(212,175,55,0.5); margin-bottom:2rem">
+        <p class="pending-text">{{ active.text }}</p>
+        {% if active.author %}
+        <p class="pending-meta-row" style="margin-top:0.5rem">&#8212; {{ active.author }}</p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Form to set a new intro quote -->
+    <h2 class="section-heading">Set a New Intro Quote</h2>
+    <form method="POST" action="/admin/landing-quote" class="submit-form" novalidate style="margin-bottom:2.5rem">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="form-group">
+            <label class="form-label" for="text">Quote text <span class="required-star">*</span></label>
+            <textarea class="form-input form-textarea" id="text" name="text"
+                placeholder="Enter the quote exactly as written…"
+                maxlength="600" rows="4" required></textarea>
+            <span class="char-hint">10–600 characters</span>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="author">
+                Attribution <span class="optional-tag">optional</span>
+            </label>
+            <input class="form-input" type="text" id="author" name="author"
+                placeholder="e.g. Darrow of Lykos · Red Rising"
+                maxlength="150">
+            <span class="char-hint">Character name · Book title — shown below the quote in small text</span>
+        </div>
+
+        <button type="submit" class="auth-btn">Post as New Intro Quote</button>
+    </form>
+
+    <!-- History list -->
+    <h2 class="section-heading">History — click Post to reuse</h2>
+
+    {% if not history %}
+    <p class="no-comments">No intro quotes saved yet.</p>
+    {% endif %}
+
+    {% for q in history %}
+    <div class="pending-card {% if q.is_active %}active-landing-card{% endif %}">
+        <p class="pending-text">{{ q.text }}</p>
+        <div class="pending-meta-row" style="margin-top:0.4rem">
+            {% if q.author %}<span>&#8212; {{ q.author }}</span>{% endif %}
+            <span class="comment-time">{{ q.created_at.strftime('%b %d, %Y') }}</span>
+            {% if q.is_active %}
+            <span class="pending-color-badge" style="background:rgba(212,175,55,0.2)">&#9670; Live now</span>
+            {% endif %}
+        </div>
+        {% if not q.is_active %}
+        <div class="pending-actions">
+            <form method="POST" action="/admin/landing-quote/{{ q.id }}/activate">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="admin-btn admin-btn-approve">&#8593; Post</button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+
+</main>
+{% endblock %}

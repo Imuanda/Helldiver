@@ -8,7 +8,7 @@ from functools import wraps
 from flask import Blueprint, render_template, redirect, url_for, request, flash, current_app
 from flask_login import current_user, login_required
 from extensions import db
-from models import Quote, User, Comment, BanRecord, Reaction, Suggestion, DailyVisit
+from models import Quote, User, Comment, BanRecord, Reaction, Suggestion, DailyVisit, LandingQuote
 from sanitize import clean_and_validate
 from validation import validate_quote
 from character_colors import lookup_color, VALID_BOOKS, VALID_COLORS
@@ -182,6 +182,56 @@ def all_quotes():
               .order_by(Quote.created_at.desc())
               .all())
     return render_template('admin/all_quotes.html', quotes=quotes)
+
+
+@admin_bp.route('/landing-quote', methods=['GET', 'POST'])
+@admin_required
+def landing_quote():
+    """Manage the quote shown on the star map entry screen."""
+    if request.method == 'POST':
+        raw_text   = request.form.get('text', '').strip()
+        raw_author = request.form.get('author', '').strip()
+
+        if not raw_text or len(raw_text) < 10:
+            flash('Quote text must be at least 10 characters.', 'error')
+            return redirect(url_for('admin.landing_quote'))
+        if len(raw_text) > 600:
+            flash('Quote text must be 600 characters or fewer.', 'error')
+            return redirect(url_for('admin.landing_quote'))
+
+        # Deactivate whatever is currently active
+        LandingQuote.query.filter_by(is_active=True).update({'is_active': False})
+
+        new_q = LandingQuote(text=raw_text, author=raw_author or None, is_active=True)
+        db.session.add(new_q)
+        db.session.commit()
+        current_app.logger.info(
+            f'Admin {current_user.username} set new landing quote (id {new_q.id})'
+        )
+        flash('New intro quote is now live on the landing page.', 'success')
+        return redirect(url_for('admin.landing_quote'))
+
+    active  = LandingQuote.query.filter_by(is_active=True).first()
+    history = (LandingQuote.query
+               .order_by(LandingQuote.created_at.desc()).all())
+    return render_template('admin/landing_quote.html', active=active, history=history)
+
+
+@admin_bp.route('/landing-quote/<int:quote_id>/activate', methods=['POST'])
+@admin_required
+def activate_landing_quote(quote_id):
+    """Re-activate a past landing quote from the history list."""
+    # Deactivate current
+    LandingQuote.query.filter_by(is_active=True).update({'is_active': False})
+    # Activate the chosen one
+    q = LandingQuote.query.get_or_404(quote_id)
+    q.is_active = True
+    db.session.commit()
+    current_app.logger.info(
+        f'Admin {current_user.username} reactivated landing quote id {quote_id}'
+    )
+    flash(f'Intro quote updated — now showing quote from {q.created_at.strftime("%b %d, %Y")}.', 'success')
+    return redirect(url_for('admin.landing_quote'))
 
 
 @admin_bp.route('/suggestions')
