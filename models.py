@@ -13,10 +13,12 @@ class User(UserMixin, db.Model):
     username      = db.Column(db.String(30),  unique=True, nullable=False)
     email         = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(256), nullable=False)  # never store plain passwords
-    is_banned     = db.Column(db.Boolean, default=False)
-    ban_reason    = db.Column(db.String(200), nullable=True)
-    is_admin      = db.Column(db.Boolean, default=False)  # grants access to /admin panel
-    created_at    = db.Column(db.DateTime, default=datetime.utcnow)
+    is_banned          = db.Column(db.Boolean, default=False)
+    ban_reason         = db.Column(db.String(200), nullable=True)
+    is_admin           = db.Column(db.Boolean, default=False)
+    failed_login_count = db.Column(db.Integer, default=0)    # consecutive failed login counter
+    locked_until       = db.Column(db.DateTime, nullable=True)  # None = not locked
+    created_at         = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Link back to quotes and comments this user submitted
     submitted_quotes = db.relationship('Quote',   backref='submitter', lazy=True,

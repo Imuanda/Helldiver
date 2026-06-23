@@ -192,17 +192,19 @@ def landing_quote():
         raw_text   = request.form.get('text', '').strip()
         raw_author = request.form.get('author', '').strip()
 
-        if not raw_text or len(raw_text) < 10:
-            flash('Quote text must be at least 10 characters.', 'error')
+        # Run both fields through the same sanitization pipeline used everywhere else
+        cleaned_text, err = clean_and_validate(raw_text, 'quote_text')
+        if err:
+            flash(f'Quote text: {err}', 'error')
             return redirect(url_for('admin.landing_quote'))
-        if len(raw_text) > 600:
-            flash('Quote text must be 600 characters or fewer.', 'error')
-            return redirect(url_for('admin.landing_quote'))
+
+        # Author field has no profanity pipeline (it's a name/attribution) but cap length
+        cleaned_author = raw_author[:150] if raw_author else None
 
         # Deactivate whatever is currently active
         LandingQuote.query.filter_by(is_active=True).update({'is_active': False})
 
-        new_q = LandingQuote(text=raw_text, author=raw_author or None, is_active=True)
+        new_q = LandingQuote(text=cleaned_text, author=cleaned_author, is_active=True)
         db.session.add(new_q)
         db.session.commit()
         current_app.logger.info(

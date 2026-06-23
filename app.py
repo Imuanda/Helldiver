@@ -31,9 +31,25 @@ else:
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# SECRET_KEY must be set as an environment variable in production
-# Render auto-generates one via render.yaml — never commit a real key to git
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-change-before-production')
+# ── Session cookie hardening ──────────────────────────────────────────────────
+# HttpOnly — JS cannot read the cookie (prevents cookie theft via XSS)
+# SameSite=Lax — cookie not sent on cross-site requests (CSRF mitigation)
+# Secure — cookie only sent over HTTPS (disabled in local dev where HTTP is used)
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+# Secure flag is True in production (gunicorn, debug=False), False in local dev (debug=True)
+app.config['SESSION_COOKIE_SECURE']   = os.environ.get('FLASK_ENV') == 'production'
+
+# SECRET_KEY is required — the app will refuse to start without it
+# Local dev: set it in .env | PythonAnywhere: set it in the WSGI file
+_secret = os.environ.get('SECRET_KEY')
+if not _secret:
+    raise RuntimeError(
+        'SECRET_KEY environment variable is not set. '
+        'Add SECRET_KEY=your-random-string to your .env file. '
+        'Generate one with: python3 -c "import secrets; print(secrets.token_hex(32))"'
+    )
+app.config['SECRET_KEY'] = _secret
 
 # ── Application logging ───────────────────────────────────────────────────────
 # Writes structured logs to logs/app.log — rotates at 1 MB, keeps 5 old files
@@ -321,8 +337,10 @@ def set_security_headers(response):
         "img-src 'self' data:; "
         "connect-src 'self';"
     )
-    # HSTS (HTTPS-only) — uncomment when deploying with a real SSL certificate
-    # response.headers['Strict-Transport-Security'] = 'max-age=63072000; includeSubDomains'
+    # HSTS — tells browsers to always use HTTPS for this domain for 2 years
+    # Only sent in production (not local dev) to avoid locking out HTTP localhost
+    if os.environ.get('FLASK_ENV') == 'production':
+        response.headers['Strict-Transport-Security'] = 'max-age=63072000; includeSubDomains'
     return response
 
 

@@ -71,6 +71,22 @@ def seed():
 
         # Create all tables defined in models.py if they don't exist yet
         db.create_all()
+
+        # ── Column migrations — safely adds new columns to existing tables ───
+        # SQLite's ALTER TABLE only supports ADD COLUMN, not remove/rename
+        from sqlalchemy import text
+        _migrations = [
+            ('users', 'failed_login_count', 'INTEGER DEFAULT 0'),
+            ('users', 'locked_until',       'DATETIME'),
+        ]
+        for table, col, col_type in _migrations:
+            try:
+                db.session.execute(text(f'ALTER TABLE {table} ADD COLUMN {col} {col_type}'))
+                db.session.commit()
+                print(f'  [migrate]  Added column {table}.{col}')
+            except Exception:
+                db.session.rollback()  # column already exists — skip silently
+
         print('Database tables ready.\n')
 
         added = 0
