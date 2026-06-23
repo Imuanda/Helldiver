@@ -3,7 +3,9 @@ import random
 import logging
 from logging.handlers import RotatingFileHandler
 from dotenv import load_dotenv
-load_dotenv()
+# Use an absolute path so .env is found regardless of the working directory
+# (PythonAnywhere's WSGI server does not always run from the project folder)
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env'))
 
 from flask import Flask, render_template, redirect, url_for, request
 from flask_login import LoginManager, current_user
