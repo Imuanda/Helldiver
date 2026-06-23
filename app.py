@@ -74,7 +74,7 @@ login_manager = LoginManager(app)
 login_manager.login_view     = 'auth.login'
 login_manager.login_message  = 'Please sign in to submit a quote.'
 
-from models import Quote, User  # import after db is bound to app
+from models import Quote, User, DailyVisit  # import after db is bound to app
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -86,11 +86,13 @@ from auth         import auth_bp
 from interactions import interactions_bp
 from submit       import submit_bp
 from admin        import admin_bp
+from suggest      import suggest_bp
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(interactions_bp)
 app.register_blueprint(submit_bp)
 app.register_blueprint(admin_bp)
+app.register_blueprint(suggest_bp)
 
 # ── Color + Others data ───────────────────────────────────────────────────────
 COLORS = {
@@ -250,6 +252,27 @@ def color_page(slug):
 # Create the file  ~/Helldiver/maintenance.flag  to put the site in maintenance.
 # Delete that file to bring it back. No code change or reload required.
 MAINTENANCE_FLAG = os.path.join(basedir, 'maintenance.flag')
+
+@app.before_request
+def track_visit():
+    """Counts unique sessions per day — one DB row per visitor per day."""
+    # Skip static files, admin routes, and API calls — only count real page views
+    if (request.path.startswith('/static') or
+            request.path.startswith('/admin') or
+            request.path.startswith('/api') or
+            request.path.startswith('/quote/')):
+        return
+    try:
+        from anon_names import get_or_create_anon
+        from datetime import date
+        from sqlalchemy.exc import IntegrityError
+        anon_id, _ = get_or_create_anon(session)
+        visit = DailyVisit(session_id=anon_id, date=date.today())
+        db.session.add(visit)
+        db.session.commit()
+    except Exception:
+        db.session.rollback()  # silently ignore duplicates and errors
+
 
 @app.before_request
 def check_maintenance():

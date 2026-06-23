@@ -36,13 +36,14 @@ profanity.load_censor_words(TARGETED_BLOCK_LIST, whitelist_words=[])
 
 # ── Character limits per field ────────────────────────────────────────────────
 CHAR_LIMITS = {
-    'username':    (3,   30),
-    'email':       (5,  120),
-    'password':    (8,  128),
-    'quote_text':  (20, 600),
-    'speaker':     (2,  100),
-    'perspective': (0,  400),
-    'comment':     (1,  500),
+    'username':    (3,    30),
+    'email':       (5,   120),
+    'password':    (8,   128),
+    'quote_text':  (20,  600),
+    'speaker':     (2,   100),
+    'perspective': (0,   400),
+    'comment':     (1,   500),
+    'suggestion':  (10, 1000),   # enough for a detailed idea, not a novel
 }
 
 # Fields that bypass the profanity filter entirely.

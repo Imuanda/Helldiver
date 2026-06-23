@@ -32,35 +32,45 @@ def react(quote_id):
         current_app.logger.warning(f'Banned session attempted reaction — id: {anon_id[:8]}…')
         return jsonify({'error': 'Your session has been suspended.'}), 403
 
-    # Look for an existing reaction of this type from this session
+    # ── 1 reaction per quote per person ──────────────────────────────────────
+    # Find ANY existing reaction from this session on this quote (any type)
     existing = Reaction.query.filter_by(
-        quote_id=quote_id, type=reaction_type, session_id=anon_id
+        quote_id=quote_id, session_id=anon_id
     ).first()
 
     count_col = f'{reaction_type}_count'
 
-    if existing:
-        # Toggle OFF — remove the reaction
+    if existing and existing.type == reaction_type:
+        # Same button tapped again — toggle OFF
         db.session.delete(existing)
         new_count = max(0, getattr(quote, count_col) - 1)
         setattr(quote, count_col, new_count)
         quote.likes = max(0, quote.likes - 1)
         db.session.commit()
-        return jsonify({'status': 'removed', 'count': new_count, 'reacted': False})
-    else:
-        # Toggle ON — add the reaction
-        reaction = Reaction(
-            quote_id=quote_id,
-            type=reaction_type,
-            session_id=anon_id,
-            user_id=current_user.id if current_user.is_authenticated else None,
-        )
-        db.session.add(reaction)
-        new_count = getattr(quote, count_col) + 1
-        setattr(quote, count_col, new_count)
-        quote.likes += 1
-        db.session.commit()
-        return jsonify({'status': 'added', 'count': new_count, 'reacted': True})
+        return jsonify({'status': 'removed', 'count': new_count, 'reacted': False, 'old_type': None})
+
+    old_type = existing.type if existing else None
+
+    if existing:
+        # Different button — remove old reaction first (swap)
+        old_col = f'{existing.type}_count'
+        setattr(quote, old_col, max(0, getattr(quote, old_col) - 1))
+        quote.likes = max(0, quote.likes - 1)
+        db.session.delete(existing)
+
+    # Add the new reaction
+    reaction = Reaction(
+        quote_id=quote_id,
+        type=reaction_type,
+        session_id=anon_id,
+        user_id=current_user.id if current_user.is_authenticated else None,
+    )
+    db.session.add(reaction)
+    new_count = getattr(quote, count_col) + 1
+    setattr(quote, count_col, new_count)
+    quote.likes += 1
+    db.session.commit()
+    return jsonify({'status': 'added', 'count': new_count, 'reacted': True, 'old_type': old_type})
 
 
 @interactions_bp.route('/quote/<int:quote_id>/comment', methods=['POST'])

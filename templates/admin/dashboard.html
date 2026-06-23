@@ -18,19 +18,15 @@
         {% endfor %}{% endif %}
     {% endwith %}
 
-    <!-- Stats row -->
+    <!-- Quotes & Users stats -->
     <div class="admin-stats">
         <div class="stat-card">
             <span class="stat-num">{{ stats.validated }}</span>
             <span class="stat-label">Live Quotes</span>
         </div>
-        <div class="stat-card stat-alert">
+        <div class="stat-card {% if stats.pending %}stat-alert{% endif %}">
             <span class="stat-num">{{ stats.pending }}</span>
             <span class="stat-label">Pending Review</span>
-        </div>
-        <div class="stat-card">
-            <span class="stat-num">{{ stats.rejected }}</span>
-            <span class="stat-label">Rejected</span>
         </div>
         <div class="stat-card">
             <span class="stat-num">{{ stats.users }}</span>
@@ -38,11 +34,36 @@
         </div>
         <div class="stat-card">
             <span class="stat-num">{{ stats.comments }}</span>
-            <span class="stat-label">Total Comments</span>
+            <span class="stat-label">Comments</span>
         </div>
         <div class="stat-card {% if stats.banned %}stat-alert{% endif %}">
             <span class="stat-num">{{ stats.banned }}</span>
             <span class="stat-label">Banned Users</span>
+        </div>
+        <div class="stat-card {% if stats.suggestions %}stat-alert{% endif %}">
+            <span class="stat-num">{{ stats.suggestions }}</span>
+            <span class="stat-label">New Suggestions</span>
+        </div>
+    </div>
+
+    <!-- Traffic stats -->
+    <h2 class="section-heading" style="margin-top:1.5rem">Traffic — Unique Visitors</h2>
+    <div class="admin-stats">
+        <div class="stat-card">
+            <span class="stat-num">{{ stats.visitors_today }}</span>
+            <span class="stat-label">Today</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-num">{{ stats.visitors_yesterday }}</span>
+            <span class="stat-label">Yesterday</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-num">{{ stats.visitors_7days }}</span>
+            <span class="stat-label">Last 7 Days</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-num">{{ stats.visitors_total }}</span>
+            <span class="stat-label">All Time</span>
         </div>
     </div>
 
@@ -53,9 +74,12 @@
         <a href="/admin/pending" class="admin-btn {% if stats.pending %}admin-btn-alert{% endif %}">
             &#9670; Review Pending Quotes {% if stats.pending %}({{ stats.pending }}){% endif %}
         </a>
-        <a href="/admin/add-quote" class="admin-btn">&#43; Add a Quote</a>
-        <a href="/admin/quotes"   class="admin-btn">&#128465; Manage Live Quotes</a>
-        <a href="/admin/users"    class="admin-btn">&#9670; Manage Users</a>
+        <a href="/admin/add-quote"    class="admin-btn">&#43; Add a Quote</a>
+        <a href="/admin/quotes"       class="admin-btn">&#128465; Manage Live Quotes</a>
+        <a href="/admin/suggestions"  class="admin-btn {% if stats.suggestions %}admin-btn-alert{% endif %}">
+            &#128172; Suggestions {% if stats.suggestions %}({{ stats.suggestions }} new){% endif %}
+        </a>
+        <a href="/admin/users"        class="admin-btn">&#9670; Manage Users</a>
     </div>
 
     {% if recent_pending %}

@@ -123,6 +123,38 @@ class Reaction(db.Model):
         return f'<Reaction {self.type} on Quote {self.quote_id}>'
 
 
+# ── Suggestion ───────────────────────────────────────────────────────────────
+class Suggestion(db.Model):
+    """Feature suggestion submitted by a registered user — visible only to admin."""
+    __tablename__ = 'suggestions'
+
+    id         = db.Column(db.Integer, primary_key=True)
+    text       = db.Column(db.String(1000), nullable=False)
+    user_id    = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    status     = db.Column(db.String(20), default='new')  # new | read | done
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship('User', backref='suggestions', lazy=True)
+
+    def __repr__(self):
+        return f'<Suggestion {self.id} by user {self.user_id}>'
+
+
+# ── DailyVisit ────────────────────────────────────────────────────────────────
+class DailyVisit(db.Model):
+    """One row per unique session per day — lightweight unique visitor counter."""
+    __tablename__ = 'daily_visits'
+
+    id         = db.Column(db.Integer, primary_key=True)
+    session_id = db.Column(db.String(100), nullable=False)
+    date       = db.Column(db.Date, nullable=False)
+
+    # Prevents counting the same session twice on the same day
+    __table_args__ = (
+        db.UniqueConstraint('session_id', 'date', name='uq_daily_session'),
+    )
+
+
 # ── BanRecord ─────────────────────────────────────────────────────────────────
 class BanRecord(db.Model):
     """Log of bans — used to audit and investigate violations."""

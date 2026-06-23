@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}Helldiver — Suggest a Feature{% endblock %}
+
+{% block content %}
+<main class="main-content auth-page">
+    <div class="auth-card">
+
+        <div class="auth-header">
+            <h1 class="auth-title">Suggest a Feature</h1>
+            <p class="auth-sub">
+                Got an idea for something you'd like to see on Helldiver?
+                Send it directly to the admin — your message won't be public.
+            </p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}{% for cat, msg in messages %}
+            <div class="flash-msg flash-{{ cat }}">{{ msg }}</div>
+            {% endfor %}{% endif %}
+        {% endwith %}
+
+        <form method="POST" action="/suggest" class="auth-form" novalidate>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="form-group {% if error %}has-error{% endif %}">
+                <label class="form-label" for="suggestion">Your suggestion</label>
+                <textarea
+                    class="form-input form-textarea"
+                    id="suggestion"
+                    name="suggestion"
+                    placeholder="e.g. Add a bio section for the main characters of the saga…"
+                    maxlength="1000"
+                    rows="5"
+                    required
+                ></textarea>
+                <span class="char-hint">10–1000 characters</span>
+                {% if error %}<span class="form-error">{{ error }}</span>{% endif %}
+            </div>
+
+            <button type="submit" class="auth-btn">Send Suggestion</button>
+        </form>
+
+        <p class="auth-switch" style="margin-top:1rem">
+            <a href="/home" class="auth-switch-link">&larr; Back to Home</a>
+        </p>
+
+    </div>
+</main>
+{% endblock %}

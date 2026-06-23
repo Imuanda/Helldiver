@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Helldiver — Suggestions{% endblock %}
+
+{% block content %}
+<main class="main-content color-page">
+    <header class="color-header" style="--color-accent: var(--gold)">
+        <div class="color-header-dot" style="background:var(--gold)"></div>
+        <div>
+            <h1 class="color-title" style="color:var(--gold)">Suggestions</h1>
+            <p class="color-caste">{{ suggestions|length }} total</p>
+        </div>
+    </header>
+
+    <div style="margin-top:1rem"><a href="/admin" class="admin-link">&larr; Back to Dashboard</a></div>
+    <hr class="section-divider">
+
+    {% if not suggestions %}
+    <div class="empty-state">
+        <div class="empty-icon">&#128172;</div>
+        <p class="empty-title">No suggestions yet</p>
+        <p class="empty-sub">Users can submit suggestions at /suggest once logged in.</p>
+    </div>
+    {% endif %}
+
+    {% for s in suggestions %}
+    <div class="pending-card {% if s.status == 'read' %}suggestion-read{% elif s.status == 'done' %}suggestion-done{% endif %}">
+        <p class="pending-text">{{ s.text }}</p>
+        <div class="pending-meta-row">
+            <span class="comment-author">{{ s.user.username }}</span>
+            <span class="comment-time">{{ s.created_at.strftime('%b %d, %Y') }}</span>
+            <span class="pending-color-badge">{{ s.status }}</span>
+        </div>
+    </div>
+    {% endfor %}
+
+</main>
+{% endblock %}

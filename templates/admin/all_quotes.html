@@ -43,12 +43,15 @@
         <p class="pending-perspective">&#128172; {{ q.perspective }}</p>
         {% endif %}
         <div class="pending-actions">
+            <a href="/admin/quotes/{{ q.id }}/reactions" class="admin-btn">
+                &#9829; View Reactions ({{ q.likes }})
+            </a>
             <form method="POST" action="/admin/quotes/{{ q.id }}/delete"
                   onsubmit="return confirm('Permanently delete this live quote? It will disappear from the site immediately.')">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <input type="hidden" name="from" value="all">
                 <button type="submit" class="admin-btn" style="color:#c0392b; border-color:rgba(192,57,43,0.4)">
-                    &#128465; Delete permanently
+                    &#128465; Delete
                 </button>
             </form>
         </div>

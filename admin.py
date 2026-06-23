@@ -8,7 +8,7 @@ from functools import wraps
 from flask import Blueprint, render_template, redirect, url_for, request, flash, current_app
 from flask_login import current_user, login_required
 from extensions import db
-from models import Quote, User, Comment, BanRecord
+from models import Quote, User, Comment, BanRecord, Reaction, Suggestion, DailyVisit
 from sanitize import clean_and_validate
 from validation import validate_quote
 from character_colors import lookup_color, VALID_BOOKS, VALID_COLORS
@@ -31,13 +31,24 @@ def admin_required(f):
 @admin_bp.route('/')
 @admin_required
 def dashboard():
+    from datetime import date, timedelta
+    today      = date.today()
+    yesterday  = today - timedelta(days=1)
+    last_7     = today - timedelta(days=7)
+
     stats = {
-        'validated':  Quote.query.filter_by(status='validated').count(),
-        'pending':    Quote.query.filter_by(status='pending').count(),
-        'rejected':   Quote.query.filter_by(status='rejected').count(),
-        'users':      User.query.count(),
-        'comments':   Comment.query.count(),
-        'banned':     User.query.filter_by(is_banned=True).count(),
+        'validated':    Quote.query.filter_by(status='validated').count(),
+        'pending':      Quote.query.filter_by(status='pending').count(),
+        'rejected':     Quote.query.filter_by(status='rejected').count(),
+        'users':        User.query.count(),
+        'comments':     Comment.query.count(),
+        'banned':       User.query.filter_by(is_banned=True).count(),
+        'suggestions':  Suggestion.query.filter_by(status='new').count(),
+        # Traffic
+        'visitors_today':   DailyVisit.query.filter_by(date=today).count(),
+        'visitors_yesterday': DailyVisit.query.filter_by(date=yesterday).count(),
+        'visitors_7days':   DailyVisit.query.filter(DailyVisit.date >= last_7).count(),
+        'visitors_total':   DailyVisit.query.count(),
     }
     # Show the 5 most recent pending quotes on the dashboard
     recent_pending = (Quote.query.filter_by(status='pending')
@@ -171,6 +182,55 @@ def all_quotes():
               .order_by(Quote.created_at.desc())
               .all())
     return render_template('admin/all_quotes.html', quotes=quotes)
+
+
+@admin_bp.route('/suggestions')
+@admin_required
+def suggestions():
+    all_suggestions = (Suggestion.query
+                       .order_by(Suggestion.created_at.desc()).all())
+    # Mark all 'new' ones as 'read' when admin views them
+    for s in all_suggestions:
+        if s.status == 'new':
+            s.status = 'read'
+    db.session.commit()
+    return render_template('admin/suggestions.html', suggestions=all_suggestions)
+
+
+@admin_bp.route('/quotes/<int:quote_id>/reactions')
+@admin_required
+def quote_reactions(quote_id):
+    """Admin-only view of who reacted to a specific quote."""
+    quote = Quote.query.get_or_404(quote_id)
+    raw   = (Reaction.query
+             .filter_by(quote_id=quote_id)
+             .order_by(Reaction.created_at.desc()).all())
+
+    # Enrich each reaction with a display name
+    reactions = []
+    for r in raw:
+        name = None
+        anon_name = None
+        if r.user_id:
+            u = User.query.get(r.user_id)
+            name = u.username if u else None
+        else:
+            # Try to find an anon name from a comment left by the same session
+            c = Comment.query.filter_by(session_id=r.session_id).first()
+            anon_name = c.author_name if c else None
+        reactions.append({
+            'type':       r.type,
+            'username':   name,
+            'anon_name':  anon_name,
+            'created_at': r.created_at,
+        })
+
+    return render_template('admin/reactions.html',
+                           quote=quote,
+                           reactions=reactions,
+                           heart_count=quote.heart_count,
+                           fire_count=quote.fire_count,
+                           shocked_count=quote.shocked_count)
 
 
 @admin_bp.route('/users')

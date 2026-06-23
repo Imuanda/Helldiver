@@ -20,17 +20,26 @@ document.querySelectorAll('.reaction-btn').forEach(btn => {
                 return;
             }
 
-            // Update the count shown on this button
+            // Update the count on the clicked button
             btn.querySelector('.reaction-count').textContent = data.count;
-
-            // Toggle a visual "reacted" state so the user knows they clicked it
             btn.classList.toggle('reacted', data.reacted);
 
-            // Update total likes counter if present on this card
+            // If the user swapped from a different reaction, deactivate the old button
+            if (data.old_type) {
+                const card    = btn.closest('[data-quote-id]');
+                const oldBtn  = card && card.querySelector(`.reaction-btn[data-type="${data.old_type}"]`);
+                if (oldBtn) {
+                    // Decrement the old button's count and remove its active state
+                    const oldCountEl = oldBtn.querySelector('.reaction-count');
+                    oldCountEl.textContent = Math.max(0, parseInt(oldCountEl.textContent, 10) - 1);
+                    oldBtn.classList.remove('reacted');
+                }
+            }
+
+            // Recalculate the total likes counter
             const card  = btn.closest('[data-quote-id]');
             const total = card && card.querySelector('.total-likes');
             if (total) {
-                // Recalculate total from all three reaction buttons on this card
                 const counts = [...card.querySelectorAll('.reaction-count')]
                     .map(el => parseInt(el.textContent, 10) || 0);
                 total.textContent = counts.reduce((a, b) => a + b, 0);

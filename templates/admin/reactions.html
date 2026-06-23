@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}Helldiver — Quote Reactions{% endblock %}
+
+{% block content %}
+<main class="main-content color-page">
+    <header class="color-header" style="--color-accent: var(--gold)">
+        <div class="color-header-dot" style="background:var(--gold)"></div>
+        <div>
+            <h1 class="color-title" style="color:var(--gold)">Reactions</h1>
+            <p class="color-caste">&#8220;{{ quote.text[:60] }}{% if quote.text|length > 60 %}…{% endif %}&#8221;</p>
+        </div>
+    </header>
+
+    <div style="margin-top:1rem"><a href="/admin/quotes" class="admin-link">&larr; Back to Live Quotes</a></div>
+    <hr class="section-divider">
+
+    {% if not reactions %}
+    <div class="empty-state">
+        <div class="empty-icon">&#9829;</div>
+        <p class="empty-title">No reactions yet</p>
+    </div>
+    {% else %}
+    <div style="display:flex; gap:2rem; margin-bottom:1.5rem; flex-wrap:wrap">
+        <span class="pending-color-badge">&#10084;&#65039; {{ heart_count }} heart{{ 's' if heart_count != 1 }}</span>
+        <span class="pending-color-badge">&#128293; {{ fire_count }} fire</span>
+        <span class="pending-color-badge">&#128562; {{ shocked_count }} shocked</span>
+    </div>
+
+    {% for r in reactions %}
+    <div class="pending-card" style="padding:0.9rem 1.2rem;">
+        <div class="pending-meta-row">
+            <span style="font-size:1.2rem">
+                {% if r.type == 'heart' %}&#10084;&#65039;
+                {% elif r.type == 'fire' %}&#128293;
+                {% else %}&#128562;{% endif %}
+            </span>
+            <span class="comment-author">
+                {% if r.username %}{{ r.username }}
+                {% elif r.anon_name %}{{ r.anon_name }} (anon)
+                {% else %}Anonymous{% endif %}
+            </span>
+            <span class="comment-time">{{ r.created_at.strftime('%b %d, %Y %H:%M') }}</span>
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+</main>
+{% endblock %}

@@ -276,6 +276,28 @@ When in doubt, stop and ask. The cost of asking is low. The cost of modifying so
 - When a new session starts, read this file first and check which steps are marked `[DONE]` before doing anything
 - Never start a completed step over — if files from that step already exist and the step is marked `[DONE]`, move on
 - When the user adds instructions for a new step, continue from that step only
+- **Every new feature must be built on its own branch** — `git checkout -b feature/name` before starting any new feature work. Merge to main when tested.
+- **Update OWNER_GUIDE.md** for every new feature or framework added — short explanation, one or two lines max per entry
+- **Always add new frameworks/libraries to the Tools section of OWNER_GUIDE.md** with a one-line description
+
+
+---
+
+## Future Features (backlog — to be built in future sessions)
+
+These are confirmed ideas the owner wants to add. Build each on its own feature branch.
+
+### Planned features:
+- **Character Bios** — a dedicated section (accessible from the sidebar) with short bios of main Red Rising characters: Darrow, Sevro, Cassius, Virginia, Ragnar, Lysander, Orion, etc. Each bio: name, Color, role in the saga, key quote
+- **Ambient Music** — optional background music (Red Rising-themed/cinematic) on the home page when reading quotes. User can toggle it on/off. Must not autoplay (browser policy)
+- **User Profile Page** — `/profile/<username>` showing quotes they've submitted and their account details
+- **Quote Search** — search bar to find quotes by keyword, speaker, or book
+- **Quote Pagination** — once color pages have many quotes, paginate them (10 per page)
+- **Email Verification** — confirm email on signup before account is active
+- **Password Reset** — forgot password flow via email
+- **Admin Notifications** — email alert to owner when a new quote or suggestion is submitted
+- **Report Button** — let users flag comments for admin review
+- **Capacitor Wrapping** — wrap the PWA for iOS/Android app store submission
 
 
 ---
