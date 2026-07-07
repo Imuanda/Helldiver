@@ -4,14 +4,55 @@ All routes require the logged-in user to have is_admin=True.
 Access: /admin
 """
 
+import os
+import uuid
 from functools import wraps
 from flask import Blueprint, render_template, redirect, url_for, request, flash, current_app
 from flask_login import current_user, login_required
 from extensions import db
-from models import Quote, User, Comment, BanRecord, Reaction, Suggestion, DailyVisit, LandingQuote
+from models import Quote, User, Comment, BanRecord, Reaction, Suggestion, DailyVisit, LandingQuote, Character
 from sanitize import clean_and_validate
 from validation import validate_quote
 from character_colors import lookup_color, VALID_BOOKS, VALID_COLORS
+
+# ── Image upload helpers ──────────────────────────────────────────────────────
+_ALLOWED_EXTS   = {'jpg', 'jpeg', 'png', 'webp'}
+_MAX_IMAGE_SIZE = 2 * 1024 * 1024  # 2 MB
+
+def _save_character_image(file):
+    """Validates and saves an uploaded character image. Returns the saved filename."""
+    content = file.read()
+
+    if len(content) > _MAX_IMAGE_SIZE:
+        raise ValueError('Image must be under 2 MB.')
+
+    # Check extension
+    raw_name = file.filename or ''
+    ext = raw_name.rsplit('.', 1)[-1].lower() if '.' in raw_name else ''
+    if ext == 'jpeg':
+        ext = 'jpg'
+    if ext not in _ALLOWED_EXTS:
+        raise ValueError('Only JPG, PNG, or WebP images are accepted.')
+
+    # Verify magic bytes — actual file content, not just the claimed extension
+    header = content[:12]
+    if header[:3] == b'\xff\xd8\xff':
+        detected = 'jpg'
+    elif header[:4] == b'\x89PNG':
+        detected = 'png'
+    elif header[:4] == b'RIFF' and header[8:12] == b'WEBP':
+        detected = 'webp'
+    else:
+        raise ValueError('File does not appear to be a valid image.')
+
+    new_filename = f"{uuid.uuid4().hex}.{detected}"
+    save_dir = os.path.join(current_app.root_path, 'static', 'characters')
+    os.makedirs(save_dir, exist_ok=True)
+
+    with open(os.path.join(save_dir, new_filename), 'wb') as f:
+        f.write(content)
+
+    return new_filename
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -320,3 +361,179 @@ def unban_user(user_id):
     current_app.logger.info(f'Admin {current_user.username} unbanned user {user.username}')
     flash(f'{user.username} has been unbanned.', 'success')
     return redirect(url_for('admin.users'))
+
+
+# ── Character management ──────────────────────────────────────────────────────
+
+@admin_bp.route('/characters')
+@admin_required
+def characters():
+    all_chars = (Character.query
+                 .order_by(Character.display_order.asc(), Character.name.asc())
+                 .all())
+    return render_template('admin/characters.html', characters=all_chars)
+
+
+@admin_bp.route('/characters/add', methods=['GET', 'POST'])
+@admin_required
+def add_character():
+    errors = {}
+    form_data = {}
+
+    if request.method == 'POST':
+        form_data = request.form
+        name      = request.form.get('name', '').strip()
+        full_name = request.form.get('full_name', '').strip()
+        color     = request.form.get('color', '').strip().lower()
+        bio       = request.form.get('bio', '').strip()
+        order     = request.form.get('display_order', '0').strip()
+
+        if not name:
+            errors['name'] = 'Name is required.'
+        elif len(name) > 50:
+            errors['name'] = 'Name must be 50 characters or fewer.'
+
+        if not full_name:
+            errors['full_name'] = 'Full name is required.'
+        elif len(full_name) > 100:
+            errors['full_name'] = 'Full name must be 100 characters or fewer.'
+
+        if color not in VALID_COLORS:
+            errors['color'] = 'Select a valid Society Color.'
+
+        if bio and len(bio) > 800:
+            errors['bio'] = 'Bio must be 800 characters or fewer.'
+
+        try:
+            order = int(order)
+        except ValueError:
+            order = 0
+
+        image_filename = None
+        uploaded = request.files.get('image')
+        if uploaded and uploaded.filename:
+            try:
+                image_filename = _save_character_image(uploaded)
+            except ValueError as e:
+                errors['image'] = str(e)
+
+        if not errors:
+            char = Character(
+                name=name,
+                full_name=full_name,
+                color=color,
+                bio=bio or None,
+                image_filename=image_filename,
+                display_order=order,
+                is_visible=True,
+            )
+            db.session.add(char)
+            db.session.commit()
+            current_app.logger.info(
+                f'Admin {current_user.username} added character "{name}"'
+            )
+            flash(f'{name} has been added to the roster.', 'success')
+            return redirect(url_for('admin.characters'))
+
+    return render_template('admin/character_form.html',
+                           mode='add', errors=errors, form_data=form_data,
+                           colors=VALID_COLORS, character=None)
+
+
+@admin_bp.route('/characters/<int:char_id>/edit', methods=['GET', 'POST'])
+@admin_required
+def edit_character(char_id):
+    char    = Character.query.get_or_404(char_id)
+    errors  = {}
+
+    if request.method == 'POST':
+        name      = request.form.get('name', '').strip()
+        full_name = request.form.get('full_name', '').strip()
+        color     = request.form.get('color', '').strip().lower()
+        bio       = request.form.get('bio', '').strip()
+        order     = request.form.get('display_order', '0').strip()
+
+        if not name:
+            errors['name'] = 'Name is required.'
+        elif len(name) > 50:
+            errors['name'] = 'Name must be 50 characters or fewer.'
+
+        if not full_name:
+            errors['full_name'] = 'Full name is required.'
+        elif len(full_name) > 100:
+            errors['full_name'] = 'Full name must be 100 characters or fewer.'
+
+        if color not in VALID_COLORS:
+            errors['color'] = 'Select a valid Society Color.'
+
+        if bio and len(bio) > 800:
+            errors['bio'] = 'Bio must be 800 characters or fewer.'
+
+        try:
+            order = int(order)
+        except ValueError:
+            order = 0
+
+        uploaded = request.files.get('image')
+        if uploaded and uploaded.filename:
+            try:
+                new_filename = _save_character_image(uploaded)
+                # Delete old image file if one exists
+                if char.image_filename:
+                    old_path = os.path.join(
+                        current_app.root_path, 'static', 'characters', char.image_filename
+                    )
+                    if os.path.exists(old_path):
+                        os.remove(old_path)
+                char.image_filename = new_filename
+            except ValueError as e:
+                errors['image'] = str(e)
+
+        if not errors:
+            char.name          = name
+            char.full_name     = full_name
+            char.color         = color
+            char.bio           = bio or None
+            char.display_order = order
+            db.session.commit()
+            current_app.logger.info(
+                f'Admin {current_user.username} edited character "{name}" (id {char_id})'
+            )
+            flash(f'{name} updated.', 'success')
+            return redirect(url_for('admin.characters'))
+
+    return render_template('admin/character_form.html',
+                           mode='edit', errors=errors, form_data=request.form,
+                           colors=VALID_COLORS, character=char)
+
+
+@admin_bp.route('/characters/<int:char_id>/toggle', methods=['POST'])
+@admin_required
+def toggle_character(char_id):
+    char = Character.query.get_or_404(char_id)
+    char.is_visible = not char.is_visible
+    db.session.commit()
+    state = 'visible' if char.is_visible else 'hidden'
+    flash(f'{char.name} is now {state}.', 'success')
+    return redirect(url_for('admin.characters'))
+
+
+@admin_bp.route('/characters/<int:char_id>/delete', methods=['POST'])
+@admin_required
+def delete_character(char_id):
+    char = Character.query.get_or_404(char_id)
+    name = char.name
+    # Remove image file from disk if one was uploaded
+    if char.image_filename:
+        img_path = os.path.join(
+            current_app.root_path, 'static', 'characters', char.image_filename
+        )
+        if os.path.exists(img_path):
+            os.remove(img_path)
+    db.session.delete(char)
+    db.session.commit()
+    current_app.logger.info(
+        f'Admin {current_user.username} deleted character "{name}" (id {char_id})'
+    )
+    flash(f'{name} has been removed from the roster.', 'success')
+    return redirect(url_for('admin.characters'))

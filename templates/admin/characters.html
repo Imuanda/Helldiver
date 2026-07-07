@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% block title %}Helldiver — Manage Characters{% endblock %}
+
+{% block content %}
+<main class="main-content color-page">
+
+    <header class="color-header" style="--color-accent: var(--gold)">
+        <div class="color-header-dot" style="background:var(--gold); box-shadow:0 0 20px var(--gold)"></div>
+        <div>
+            <h1 class="color-title" style="color:var(--gold)">Meet them — Characters</h1>
+            <p class="color-caste">Manage bios and portraits for the public roster.</p>
+        </div>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}{% for cat, msg in messages %}
+        <div class="flash-msg flash-{{ cat }}" style="margin:1rem 0">{{ msg }}</div>
+        {% endfor %}{% endif %}
+    {% endwith %}
+
+    <div class="admin-actions" style="margin-bottom:1.5rem">
+        <a href="/admin/characters/add" class="admin-btn">&#43; Add Character</a>
+        <a href="/admin/"               class="admin-btn">&#8592; Dashboard</a>
+    </div>
+
+    {% if characters %}
+    <div class="admin-char-list">
+        {% set color_hex = {
+            'gold':     '#d4af37',
+            'red':      '#c0392b',
+            'obsidian': '#3a3a3a',
+            'gray':     '#8e9aaf',
+            'silver':   '#b0b0c0',
+            'pink':     '#e75480',
+            'blue':     '#4a90e2',
+            'white':    '#f0ece4',
+            'copper':   '#b87333',
+            'orange':   '#e07b39',
+            'green':    '#50c878',
+            'violet':   '#8a4fff',
+            'yellow':   '#f5c842',
+            'bronze':   '#cd7f32',
+            'tan':      '#c8a87a',
+        } %}
+
+        {% for char in characters %}
+        {% set accent = color_hex.get(char.color, '#d4af37') %}
+        <div class="admin-char-row {% if not char.is_visible %}admin-char-hidden{% endif %}">
+
+            <!-- Thumbnail -->
+            <div class="admin-char-thumb" style="border-color: {{ accent }};">
+                {% if char.image_filename %}
+                    <img src="{{ url_for('static', filename='characters/' + char.image_filename) }}"
+                         alt="{{ char.name }}">
+                {% else %}
+                    <div class="admin-char-thumb-placeholder" style="background: {{ accent }}20; color: {{ accent }};">
+                        {{ char.name[0] }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Info -->
+            <div class="admin-char-info">
+                <span class="admin-char-name">{{ char.name }}</span>
+                <span class="admin-char-fullname">{{ char.full_name }}</span>
+                <span class="admin-char-color" style="color: {{ accent }};">{{ char.color | capitalize }}</span>
+                {% if not char.is_visible %}
+                <span class="admin-char-status-tag">Hidden</span>
+                {% endif %}
+            </div>
+
+            <!-- Bio preview -->
+            <div class="admin-char-bio-preview">
+                {% if char.bio %}
+                    {{ char.bio[:100] }}{% if char.bio|length > 100 %}…{% endif %}
+                {% else %}
+                    <em style="opacity:0.45">No bio yet</em>
+                {% endif %}
+            </div>
+
+            <!-- Actions -->
+            <div class="admin-char-actions">
+                <a href="/admin/characters/{{ char.id }}/edit" class="admin-btn-sm">Edit</a>
+
+                <form method="POST" action="/admin/characters/{{ char.id }}/toggle" style="display:inline">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="admin-btn-sm" type="submit">
+                        {{ 'Show' if not char.is_visible else 'Hide' }}
+                    </button>
+                </form>
+
+                <form method="POST" action="/admin/characters/{{ char.id }}/delete" style="display:inline"
+                      onsubmit="return confirm('Permanently delete {{ char.name }}? This cannot be undone.')">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="admin-btn-sm admin-btn-danger" type="submit">Delete</button>
+                </form>
+            </div>
+
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="characters-empty" style="margin-top:3rem">
+        <p>No characters yet. Click <strong>Add Character</strong> to get started.</p>
+    </div>
+    {% endif %}
+
+</main>
+{% endblock %}

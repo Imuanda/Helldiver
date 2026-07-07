@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block title %}Helldiver — Meet them{% endblock %}
+
+{% block content %}
+<main class="main-content characters-page">
+
+    <div class="characters-header">
+        <h1 class="characters-title">Meet them</h1>
+        <p class="characters-sub">The faces behind the saga — in their own words, in their own colors.</p>
+    </div>
+
+    {% if characters %}
+    <div class="characters-grid">
+        {% set color_hex = {
+            'gold':     '#d4af37',
+            'red':      '#c0392b',
+            'obsidian': '#3a3a3a',
+            'gray':     '#8e9aaf',
+            'silver':   '#b0b0c0',
+            'pink':     '#e75480',
+            'blue':     '#4a90e2',
+            'white':    '#f0ece4',
+            'copper':   '#b87333',
+            'orange':   '#e07b39',
+            'green':    '#50c878',
+            'violet':   '#8a4fff',
+            'yellow':   '#f5c842',
+            'bronze':   '#cd7f32',
+            'tan':      '#c8a87a',
+        } %}
+
+        {% for char in characters %}
+        {% set accent = color_hex.get(char.color, '#d4af37') %}
+        <article class="char-card" style="--char-accent: {{ accent }};">
+
+            <div class="char-image-wrap">
+                {% if char.image_filename %}
+                    <img
+                        class="char-image"
+                        src="{{ url_for('static', filename='characters/' + char.image_filename) }}"
+                        alt="Portrait of {{ char.name }}"
+                        loading="lazy"
+                    >
+                {% else %}
+                    <!-- Placeholder shown until a real image is uploaded -->
+                    <div class="char-placeholder">
+                        <span class="char-initial">{{ char.name[0] }}</span>
+                    </div>
+                {% endif %}
+                <div class="char-color-badge" style="background: {{ accent }};">
+                    {{ char.color | capitalize }}
+                </div>
+            </div>
+
+            <div class="char-body">
+                <h2 class="char-name">{{ char.name }}</h2>
+                <p class="char-full-name">{{ char.full_name }}</p>
+
+                {% if char.bio %}
+                <p class="char-bio">{{ char.bio }}</p>
+                {% else %}
+                <p class="char-bio char-bio-placeholder">Bio coming soon.</p>
+                {% endif %}
+            </div>
+
+        </article>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="characters-empty">
+        <p>No characters have been added yet. Check back soon.</p>
+    </div>
+    {% endif %}
+
+</main>
+{% endblock %}
