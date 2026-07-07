@@ -295,7 +295,22 @@ When in doubt, stop and ask. The cost of asking is low. The cost of modifying so
 These are confirmed ideas the owner wants to add. Build each on its own feature branch.
 
 ### Planned features:
-- **Character Bios** — a dedicated section (accessible from the sidebar) with short bios of main Red Rising characters: Darrow, Sevro, Cassius, Virginia, Ragnar, Lysander, Orion, etc. Each bio: name, Color, role in the saga, key quote
+- **Character Bios** — a dedicated "Meet your Favs" section (accessible from the sidebar) with short bios and a photo for each character. Each card: name, Color, role in the saga, short bio, key quote.
+
+  **Initial character roster (Round 1):**
+  | # | Name | Full Name | Color |
+  |---|------|-----------|-------|
+  | 1 | Eo | Eo of Lykos | Red |
+  | 2 | Darrow | Darrow of Lykos | Red |
+  | 3 | Sevro | Sevro au Barca | Gold |
+  | 4 | Mustang | Virginia au Augustus | Gold |
+  | 5 | Victra | Victra au Julii | Gold |
+  | 6 | Quicksilver | Quicksilver | Silver |
+  | 7 | Dancer | Dancer | Red |
+  | 8 | Fitchner | Fitchner au Barca | Gold |
+  | 9 | Cassius | Cassius au Bellona | Gold |
+
+  *More characters will be added in future rounds. Update this table when new ones are confirmed.*
 - **Ambient Music** — optional background music (Red Rising-themed/cinematic) on the home page when reading quotes. User can toggle it on/off. Must not autoplay (browser policy)
 - **User Profile Page** — `/profile/<username>` showing quotes they've submitted and their account details
 - **Quote Search** — search bar to find quotes by keyword, speaker, or book

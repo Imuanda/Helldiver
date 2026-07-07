@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% block title %}Helldiver — {{ 'Edit' if mode == 'edit' else 'Add' }} Character{% endblock %}
+
+{% block content %}
+<main class="main-content color-page">
+
+    <header class="color-header" style="--color-accent: var(--gold)">
+        <div class="color-header-dot" style="background:var(--gold); box-shadow:0 0 20px var(--gold)"></div>
+        <div>
+            <h1 class="color-title" style="color:var(--gold)">
+                {{ 'Edit' if mode == 'edit' else 'Add' }} Character
+            </h1>
+            <p class="color-caste">
+                {% if mode == 'edit' %}Updating {{ character.name }}{% else %}New entry for the roster{% endif %}
+            </p>
+        </div>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}{% for cat, msg in messages %}
+        <div class="flash-msg flash-{{ cat }}" style="margin:1rem 0">{{ msg }}</div>
+        {% endfor %}{% endif %}
+    {% endwith %}
+
+    <form method="POST"
+          action="{{ '/admin/characters/' + character.id|string + '/edit' if mode == 'edit' else '/admin/characters/add' }}"
+          enctype="multipart/form-data"
+          class="auth-form"
+          style="max-width:600px; margin-top:1.5rem">
+
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <!-- Name -->
+        <div class="form-group {% if errors.name %}has-error{% endif %}">
+            <label class="form-label">Display Name</label>
+            <input class="form-input" type="text" name="name" maxlength="50"
+                   placeholder="e.g. Darrow"
+                   value="{{ form_data.get('name', character.name if character else '') }}">
+            <span class="char-hint">The short name shown on the card (max 50 chars)</span>
+            {% if errors.name %}<span class="form-error">{{ errors.name }}</span>{% endif %}
+        </div>
+
+        <!-- Full name -->
+        <div class="form-group {% if errors.full_name %}has-error{% endif %}">
+            <label class="form-label">Full Name</label>
+            <input class="form-input" type="text" name="full_name" maxlength="100"
+                   placeholder="e.g. Darrow of Lykos"
+                   value="{{ form_data.get('full_name', character.full_name if character else '') }}">
+            <span class="char-hint">Full name with house or title (max 100 chars)</span>
+            {% if errors.full_name %}<span class="form-error">{{ errors.full_name }}</span>{% endif %}
+        </div>
+
+        <!-- Society Color -->
+        <div class="form-group {% if errors.color %}has-error{% endif %}">
+            <label class="form-label">Society Color</label>
+            <select class="form-input" name="color">
+                <option value="">— Select a Color —</option>
+                {% set current_color = form_data.get('color', character.color if character else '') %}
+                {% for c in colors %}
+                <option value="{{ c }}" {% if c == current_color %}selected{% endif %}>
+                    {{ c | capitalize }}
+                </option>
+                {% endfor %}
+            </select>
+            {% if errors.color %}<span class="form-error">{{ errors.color }}</span>{% endif %}
+        </div>
+
+        <!-- Bio -->
+        <div class="form-group {% if errors.bio %}has-error{% endif %}">
+            <label class="form-label">Bio</label>
+            <textarea class="form-input" name="bio" rows="5" maxlength="800"
+                      placeholder="A few sentences about this character — who they are, their role, what makes them memorable.">{{ form_data.get('bio', character.bio if character and character.bio else '') }}</textarea>
+            <span class="char-hint">Max 800 characters</span>
+            {% if errors.bio %}<span class="form-error">{{ errors.bio }}</span>{% endif %}
+        </div>
+
+        <!-- Image upload -->
+        <div class="form-group {% if errors.image %}has-error{% endif %}">
+            <label class="form-label">Portrait Image</label>
+
+            {% if mode == 'edit' and character.image_filename %}
+            <div style="margin-bottom:0.75rem">
+                <img src="{{ url_for('static', filename='characters/' + character.image_filename) }}"
+                     alt="Current portrait of {{ character.name }}"
+                     style="width:100px; height:125px; object-fit:cover; border-radius:8px; border:1px solid rgba(212,175,55,0.3);">
+                <p style="font-size:0.78rem; color:var(--text-dim); margin-top:0.4rem">
+                    Current image — upload a new one below to replace it.
+                </p>
+            </div>
+            {% endif %}
+
+            <input class="form-input" type="file" name="image" accept=".jpg,.jpeg,.png,.webp">
+            <span class="char-hint">JPG, PNG, or WebP · Max 2 MB · Recommended: 800 × 1000 px</span>
+            {% if errors.image %}<span class="form-error">{{ errors.image }}</span>{% endif %}
+        </div>
+
+        <!-- Display order -->
+        <div class="form-group">
+            <label class="form-label">Display Order</label>
+            <input class="form-input" type="number" name="display_order" min="0"
+                   value="{{ form_data.get('display_order', character.display_order if character else 0) }}"
+                   style="max-width:120px">
+            <span class="char-hint">Lower numbers appear first on the page (0 = first)</span>
+        </div>
+
+        <div style="display:flex; gap:0.75rem; margin-top:1.5rem; flex-wrap:wrap">
+            <button type="submit" class="auth-btn" style="max-width:200px">
+                {{ 'Save Changes' if mode == 'edit' else 'Add to Roster' }}
+            </button>
+            <a href="/admin/characters" class="admin-btn" style="display:inline-flex; align-items:center">
+                Cancel
+            </a>
+        </div>
+
+    </form>
+
+</main>
+{% endblock %}

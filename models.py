@@ -174,6 +174,25 @@ class DailyVisit(db.Model):
     )
 
 
+# ── Character ─────────────────────────────────────────────────────────────────
+class Character(db.Model):
+    """A character bio entry for the Meet them page — managed by admin."""
+    __tablename__ = 'characters'
+
+    id             = db.Column(db.Integer, primary_key=True)
+    name           = db.Column(db.String(50),  nullable=False)   # short display name: "Darrow"
+    full_name      = db.Column(db.String(100), nullable=False)   # "Darrow of Lykos"
+    color          = db.Column(db.String(30),  nullable=False)   # Society Color: "red", "gold"…
+    bio            = db.Column(db.String(800), nullable=True)
+    image_filename = db.Column(db.String(200), nullable=True)    # stored in static/characters/
+    display_order  = db.Column(db.Integer,     default=0)        # controls card sort order
+    is_visible     = db.Column(db.Boolean,     default=True)
+    created_at     = db.Column(db.DateTime,    default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<Character {self.name} ({self.color})>'
+
+
 # ── BanRecord ─────────────────────────────────────────────────────────────────
 class BanRecord(db.Model):
     """Log of bans — used to audit and investigate violations."""

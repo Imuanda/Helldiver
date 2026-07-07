@@ -92,7 +92,7 @@ login_manager = LoginManager(app)
 login_manager.login_view     = 'auth.login'
 login_manager.login_message  = 'Please sign in to submit a quote.'
 
-from models import Quote, User, DailyVisit, LandingQuote  # import after db is bound to app
+from models import Quote, User, DailyVisit, LandingQuote, Character  # import after db is bound to app
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -257,6 +257,15 @@ def api_quote(quote_id):
         'likes':         quote.likes,
         'perspective':   quote.perspective,
     })
+
+
+@app.route('/characters')
+def characters():
+    chars = (Character.query
+             .filter_by(is_visible=True)
+             .order_by(Character.display_order.asc(), Character.name.asc())
+             .all())
+    return render_template('characters.html', characters=chars, active_page='characters')
 
 
 @app.route('/colors/others')
