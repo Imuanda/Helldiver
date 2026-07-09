@@ -33,20 +33,44 @@
         {% set accent = color_hex.get(char.color, '#d4af37') %}
         <article class="char-card" style="--char-accent: {{ accent }};">
 
+            {% set images = [] %}
+            {% if char.image_filename   %}{% set _ = images.append(char.image_filename)   %}{% endif %}
+            {% if char.image_filename_2 %}{% set _ = images.append(char.image_filename_2) %}{% endif %}
+            {% if char.image_filename_3 %}{% set _ = images.append(char.image_filename_3) %}{% endif %}
+
             <div class="char-image-wrap">
-                {% if char.image_filename %}
-                    <img
-                        class="char-image"
-                        src="{{ url_for('static', filename='characters/' + char.image_filename) }}"
-                        alt="Portrait of {{ char.name }}"
-                        loading="lazy"
-                    >
-                {% else %}
-                    <!-- Placeholder shown until a real image is uploaded -->
-                    <div class="char-placeholder">
-                        <span class="char-initial">{{ char.name[0] }}</span>
+                <div class="char-carousel" data-count="{{ images|length }}">
+
+                    {% if images %}
+                        {% for img in images %}
+                        <div class="char-slide {% if loop.first %}active{% endif %}">
+                            <img class="char-image"
+                                 src="{{ url_for('static', filename='characters/' + img) }}"
+                                 alt="Portrait {{ loop.index }} of {{ char.name }}"
+                                 loading="lazy">
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <!-- Placeholder shown until a real image is uploaded -->
+                        <div class="char-slide active">
+                            <div class="char-placeholder">
+                                <span class="char-initial">{{ char.name[0] }}</span>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if images|length > 1 %}
+                    <button class="char-prev" aria-label="Previous image">&#8249;</button>
+                    <button class="char-next" aria-label="Next image">&#8250;</button>
+                    <div class="char-dots">
+                        {% for img in images %}
+                        <span class="char-dot {% if loop.first %}active{% endif %}"></span>
+                        {% endfor %}
                     </div>
-                {% endif %}
+                    {% endif %}
+
+                </div>
+
                 <div class="char-color-badge" style="background: {{ accent }};">
                     {{ char.color | capitalize }}
                 </div>
@@ -74,4 +98,41 @@
     {% endif %}
 
 </main>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.querySelectorAll('.char-carousel').forEach(function(carousel) {
+    var slides = carousel.querySelectorAll('.char-slide');
+    var dots   = carousel.querySelectorAll('.char-dot');
+    var count  = slides.length;
+
+    if (count < 2) return; // single image — no navigation needed
+
+    var current = 0;
+
+    function show(idx) {
+        slides[current].classList.remove('active');
+        if (dots[current]) dots[current].classList.remove('active');
+        current = (idx + count) % count;
+        slides[current].classList.add('active');
+        if (dots[current]) dots[current].classList.add('active');
+    }
+
+    carousel.querySelector('.char-prev').addEventListener('click', function() { show(current - 1); });
+    carousel.querySelector('.char-next').addEventListener('click', function() { show(current + 1); });
+
+    // Touch swipe support for mobile
+    var touchStartX = 0;
+    carousel.addEventListener('touchstart', function(e) {
+        touchStartX = e.touches[0].clientX;
+    }, { passive: true });
+    carousel.addEventListener('touchend', function(e) {
+        var diff = touchStartX - e.changedTouches[0].clientX;
+        if (Math.abs(diff) > 40) {
+            diff > 0 ? show(current + 1) : show(current - 1);
+        }
+    });
+});
+</script>
 {% endblock %}

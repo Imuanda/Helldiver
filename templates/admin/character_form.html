@@ -74,25 +74,43 @@
             {% if errors.bio %}<span class="form-error">{{ errors.bio }}</span>{% endif %}
         </div>
 
-        <!-- Image upload -->
-        <div class="form-group {% if errors.image %}has-error{% endif %}">
-            <label class="form-label">Portrait Image</label>
+        <!-- Image slots — up to 3 portraits per character -->
+        {% set img_slots = [
+            ('image',   'image_filename',   'remove_image',   'Portrait 1 (primary)'),
+            ('image_2', 'image_filename_2', 'remove_image_2', 'Portrait 2 (optional)'),
+            ('image_3', 'image_filename_3', 'remove_image_3', 'Portrait 3 (optional)'),
+        ] %}
 
-            {% if mode == 'edit' and character.image_filename %}
-            <div style="margin-bottom:0.75rem">
-                <img src="{{ url_for('static', filename='characters/' + character.image_filename) }}"
-                     alt="Current portrait of {{ character.name }}"
-                     style="width:100px; height:125px; object-fit:cover; border-radius:8px; border:1px solid rgba(212,175,55,0.3);">
-                <p style="font-size:0.78rem; color:var(--text-dim); margin-top:0.4rem">
-                    Current image — upload a new one below to replace it.
-                </p>
+        {% for field, attr, remove_field, label in img_slots %}
+        {% set current_file = character.image_filename   if field == 'image'   and character else
+                              character.image_filename_2 if field == 'image_2' and character else
+                              character.image_filename_3 if field == 'image_3' and character else None %}
+        <div class="form-group {% if errors[field] %}has-error{% endif %}"
+             style="border-top: 1px solid rgba(255,255,255,0.06); padding-top:1rem; margin-top:0.25rem">
+            <label class="form-label">{{ label }}</label>
+
+            {% if mode == 'edit' and current_file %}
+            <div style="display:flex; align-items:flex-start; gap:0.75rem; margin-bottom:0.75rem">
+                <img src="{{ url_for('static', filename='characters/' + current_file) }}"
+                     alt="Current {{ label }}"
+                     style="width:80px; height:100px; object-fit:cover; border-radius:6px; border:1px solid rgba(212,175,55,0.25); flex-shrink:0">
+                <div>
+                    <p style="font-size:0.78rem; color:var(--text-dim); margin-bottom:0.5rem">
+                        Upload a new file below to replace this image.
+                    </p>
+                    <label style="display:flex; align-items:center; gap:0.4rem; font-size:0.78rem; color:#e74c3c; cursor:pointer">
+                        <input type="checkbox" name="{{ remove_field }}" value="1">
+                        Remove this image
+                    </label>
+                </div>
             </div>
             {% endif %}
 
-            <input class="form-input" type="file" name="image" accept=".jpg,.jpeg,.png,.webp">
+            <input class="form-input" type="file" name="{{ field }}" accept=".jpg,.jpeg,.png,.webp">
             <span class="char-hint">JPG, PNG, or WebP · Max 2 MB · Recommended: 800 × 1000 px</span>
-            {% if errors.image %}<span class="form-error">{{ errors.image }}</span>{% endif %}
+            {% if errors[field] %}<span class="form-error">{{ errors[field] }}</span>{% endif %}
         </div>
+        {% endfor %}
 
         <!-- Display order -->
         <div class="form-group">

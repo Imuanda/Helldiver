@@ -295,6 +295,8 @@ When in doubt, stop and ask. The cost of asking is low. The cost of modifying so
 These are confirmed ideas the owner wants to add. Build each on its own feature branch.
 
 ### Planned features:
+- **Fighting Styles** — a dedicated section exploring the combat traditions of the Red Rising universe (Gold dueling, Obsidian warrior codes, the Razor as a weapon, Institute-era tactics, Howler guerrilla style, etc.). Name TBD. Each entry would describe the style, who uses it, and its role in the story.
+- **Last Moments** — a section dedicated to significant character deaths, protected by a spoiler gate (user selects which books they have read before entering, so they only see deaths from books they've finished). Could include a discussion/comment thread per character. Name TBD.
 - **Character Bios** — a dedicated "Meet your Favs" section (accessible from the sidebar) with short bios and a photo for each character. Each card: name, Color, role in the saga, short bio, key quote.
 
   **Initial character roster (Round 1):**
