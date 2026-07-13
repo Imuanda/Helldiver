@@ -74,24 +74,67 @@
             {% if errors.bio %}<span class="form-error">{{ errors.bio }}</span>{% endif %}
         </div>
 
-        <!-- Image upload -->
-        <div class="form-group {% if errors.image %}has-error{% endif %}">
-            <label class="form-label">Portrait Image</label>
+        <!-- Photos — up to 3, revealed progressively -->
+        <div class="form-group" style="border-top:1px solid rgba(255,255,255,0.06); padding-top:1.25rem; margin-top:0.25rem">
+            <label class="form-label" style="margin-bottom:0.9rem; display:block">Photos</label>
 
-            {% if mode == 'edit' and character.image_filename %}
-            <div style="margin-bottom:0.75rem">
-                <img src="{{ url_for('static', filename='characters/' + character.image_filename) }}"
-                     alt="Current portrait of {{ character.name }}"
-                     style="width:100px; height:125px; object-fit:cover; border-radius:8px; border:1px solid rgba(212,175,55,0.3);">
-                <p style="font-size:0.78rem; color:var(--text-dim); margin-top:0.4rem">
-                    Current image — upload a new one below to replace it.
-                </p>
+            <!-- Photo 1 — always visible -->
+            <div class="photo-slot" id="slot-1">
+                <p class="slot-number">Photo 1</p>
+                {% if mode == 'edit' and character and character.image_filename %}
+                <div class="slot-current">
+                    <img src="{{ url_for('static', filename='characters/' + character.image_filename) }}"
+                         alt="Current photo 1">
+                    <label class="remove-label">
+                        <input type="checkbox" name="remove_image" value="1"> Remove
+                    </label>
+                </div>
+                {% endif %}
+                <input class="form-input" type="file" name="image" accept=".jpg,.jpeg,.png,.webp">
+                {% if errors.image %}<span class="form-error">{{ errors.image }}</span>{% endif %}
             </div>
+
+            <!-- Photo 2 — shown if already exists, otherwise revealed by button -->
+            {% set has_2 = mode == 'edit' and character and character.image_filename_2 %}
+            <div class="photo-slot" id="slot-2" {% if not has_2 %}style="display:none"{% endif %}>
+                <p class="slot-number">Photo 2</p>
+                {% if has_2 %}
+                <div class="slot-current">
+                    <img src="{{ url_for('static', filename='characters/' + character.image_filename_2) }}"
+                         alt="Current photo 2">
+                    <label class="remove-label">
+                        <input type="checkbox" name="remove_image_2" value="1"> Remove
+                    </label>
+                </div>
+                {% endif %}
+                <input class="form-input" type="file" name="image_2" accept=".jpg,.jpeg,.png,.webp">
+                {% if errors.image_2 %}<span class="form-error">{{ errors.image_2 }}</span>{% endif %}
+            </div>
+
+            <!-- Photo 3 — shown if already exists, otherwise revealed by button -->
+            {% set has_3 = mode == 'edit' and character and character.image_filename_3 %}
+            <div class="photo-slot" id="slot-3" {% if not has_3 %}style="display:none"{% endif %}>
+                <p class="slot-number">Photo 3</p>
+                {% if has_3 %}
+                <div class="slot-current">
+                    <img src="{{ url_for('static', filename='characters/' + character.image_filename_3) }}"
+                         alt="Current photo 3">
+                    <label class="remove-label">
+                        <input type="checkbox" name="remove_image_3" value="1"> Remove
+                    </label>
+                </div>
+                {% endif %}
+                <input class="form-input" type="file" name="image_3" accept=".jpg,.jpeg,.png,.webp">
+                {% if errors.image_3 %}<span class="form-error">{{ errors.image_3 }}</span>{% endif %}
+            </div>
+
+            <!-- Add more button — hidden once all 3 slots are visible -->
+            {% if not (has_2 and has_3) %}
+            <button type="button" id="add-photo-btn" class="admin-btn-sm" style="margin-top:0.9rem">
+                &#43; Add another photo
+            </button>
             {% endif %}
 
-            <input class="form-input" type="file" name="image" accept=".jpg,.jpeg,.png,.webp">
-            <span class="char-hint">JPG, PNG, or WebP · Max 2 MB · Recommended: 800 × 1000 px</span>
-            {% if errors.image %}<span class="form-error">{{ errors.image }}</span>{% endif %}
         </div>
 
         <!-- Display order -->
@@ -115,4 +158,35 @@
     </form>
 
 </main>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function () {
+    var btn = document.getElementById('add-photo-btn');
+    if (!btn) return; // all 3 slots already filled — button not rendered
+
+    var slots = [
+        document.getElementById('slot-2'),
+        document.getElementById('slot-3'),
+    ];
+
+    // Start after whichever slots are already visible
+    var nextIdx = 0;
+    while (nextIdx < slots.length && slots[nextIdx].style.display !== 'none') {
+        nextIdx++;
+    }
+
+    btn.addEventListener('click', function () {
+        if (nextIdx < slots.length) {
+            slots[nextIdx].style.display = 'block';
+            slots[nextIdx].querySelector('input[type="file"]').focus();
+            nextIdx++;
+            if (nextIdx >= slots.length) {
+                btn.style.display = 'none'; // reached the max
+            }
+        }
+    });
+}());
+</script>
 {% endblock %}

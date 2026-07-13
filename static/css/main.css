@@ -1440,6 +1440,88 @@ ul { list-style: none; }
     user-select: none;
 }
 
+/* ── Character image carousel ────────────────────────────── */
+.char-carousel {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.char-slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    pointer-events: none;
+}
+
+.char-slide.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.char-prev,
+.char-next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #fff;
+    font-size: 1.2rem;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+    /* hidden until card is hovered */
+    opacity: 0;
+    transition: opacity 0.2s, background 0.2s;
+}
+
+.char-card:hover .char-prev,
+.char-card:hover .char-next {
+    opacity: 1;
+}
+
+.char-prev { left: 0.45rem; }
+.char-next { right: 0.45rem; }
+
+.char-prev:hover,
+.char-next:hover {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.char-dots {
+    position: absolute;
+    bottom: 0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 0.35rem;
+    z-index: 10;
+}
+
+.char-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.35);
+    transition: background 0.2s, transform 0.2s;
+}
+
+.char-dot.active {
+    background: #fff;
+    transform: scale(1.25);
+}
+
+/* ── ── ── ── ── ── ── ── ── ── ── ── ── ── ── ── ── ── ── */
+
 .char-color-badge {
     position: absolute;
     bottom: 0.6rem;
@@ -1628,4 +1710,49 @@ ul { list-style: none; }
 .admin-btn-danger:hover {
     background: rgba(192, 57, 43, 0.12);
     border-color: #e74c3c;
+}
+
+/* ── Admin — progressive photo slots ────────────────────── */
+.photo-slot {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 10px;
+    padding: 0.9rem 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.slot-number {
+    font-size: 0.75rem;
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.06em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+}
+
+.slot-current {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 0.65rem;
+}
+
+.slot-current img {
+    width: 72px;
+    height: 90px;
+    object-fit: cover;
+    object-position: top center;
+    border-radius: 6px;
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    flex-shrink: 0;
+}
+
+.remove-label {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.78rem;
+    color: #e74c3c;
+    cursor: pointer;
+    margin-top: 0.35rem;
 }

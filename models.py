@@ -184,8 +184,10 @@ class Character(db.Model):
     full_name      = db.Column(db.String(100), nullable=False)   # "Darrow of Lykos"
     color          = db.Column(db.String(30),  nullable=False)   # Society Color: "red", "gold"…
     bio            = db.Column(db.String(800), nullable=True)
-    image_filename = db.Column(db.String(200), nullable=True)    # stored in static/characters/
-    display_order  = db.Column(db.Integer,     default=0)        # controls card sort order
+    image_filename   = db.Column(db.String(200), nullable=True)  # primary portrait
+    image_filename_2 = db.Column(db.String(200), nullable=True)  # optional second image
+    image_filename_3 = db.Column(db.String(200), nullable=True)  # optional third image
+    display_order    = db.Column(db.Integer,     default=0)      # controls card sort order
     is_visible     = db.Column(db.Boolean,     default=True)
     created_at     = db.Column(db.DateTime,    default=datetime.utcnow)
 

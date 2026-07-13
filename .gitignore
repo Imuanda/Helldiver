@@ -15,6 +15,9 @@ redrising/
 # Owner guide — private operational document, must never be public
 OWNER_GUIDE.md
 
+# Personal learning guide — private, for the owner only
+LEARNING_GUIDE.md
+
 # Private security workbook (Claude's reference for security features)
 PRIVATE_WORKBOOK.md
 

@@ -409,13 +409,14 @@ def add_character():
         except ValueError:
             order = 0
 
-        image_filename = None
-        uploaded = request.files.get('image')
-        if uploaded and uploaded.filename:
-            try:
-                image_filename = _save_character_image(uploaded)
-            except ValueError as e:
-                errors['image'] = str(e)
+        images = [None, None, None]
+        for i, field in enumerate(['image', 'image_2', 'image_3']):
+            uploaded = request.files.get(field)
+            if uploaded and uploaded.filename:
+                try:
+                    images[i] = _save_character_image(uploaded)
+                except ValueError as e:
+                    errors[field] = str(e)
 
         if not errors:
             char = Character(
@@ -423,7 +424,9 @@ def add_character():
                 full_name=full_name,
                 color=color,
                 bio=bio or None,
-                image_filename=image_filename,
+                image_filename=images[0],
+                image_filename_2=images[1],
+                image_filename_3=images[2],
                 display_order=order,
                 is_visible=True,
             )
@@ -474,20 +477,33 @@ def edit_character(char_id):
         except ValueError:
             order = 0
 
-        uploaded = request.files.get('image')
-        if uploaded and uploaded.filename:
-            try:
-                new_filename = _save_character_image(uploaded)
-                # Delete old image file if one exists
-                if char.image_filename:
-                    old_path = os.path.join(
-                        current_app.root_path, 'static', 'characters', char.image_filename
-                    )
-                    if os.path.exists(old_path):
-                        os.remove(old_path)
-                char.image_filename = new_filename
-            except ValueError as e:
-                errors['image'] = str(e)
+        slots = [
+            ('image',   'image_filename',   'remove_image'),
+            ('image_2', 'image_filename_2', 'remove_image_2'),
+            ('image_3', 'image_filename_3', 'remove_image_3'),
+        ]
+        for field, attr, remove_field in slots:
+            remove = request.form.get(remove_field) == '1'
+            uploaded = request.files.get(field)
+            current_file = getattr(char, attr)
+
+            if remove and current_file:
+                old_path = os.path.join(current_app.root_path, 'static', 'characters', current_file)
+                if os.path.exists(old_path):
+                    os.remove(old_path)
+                setattr(char, attr, None)
+            elif uploaded and uploaded.filename:
+                try:
+                    new_filename = _save_character_image(uploaded)
+                    if current_file:
+                        old_path = os.path.join(
+                            current_app.root_path, 'static', 'characters', current_file
+                        )
+                        if os.path.exists(old_path):
+                            os.remove(old_path)
+                    setattr(char, attr, new_filename)
+                except ValueError as e:
+                    errors[field] = str(e)
 
         if not errors:
             char.name          = name
@@ -523,13 +539,12 @@ def toggle_character(char_id):
 def delete_character(char_id):
     char = Character.query.get_or_404(char_id)
     name = char.name
-    # Remove image file from disk if one was uploaded
-    if char.image_filename:
-        img_path = os.path.join(
-            current_app.root_path, 'static', 'characters', char.image_filename
-        )
-        if os.path.exists(img_path):
-            os.remove(img_path)
+    # Remove all image files from disk
+    for fname in [char.image_filename, char.image_filename_2, char.image_filename_3]:
+        if fname:
+            img_path = os.path.join(current_app.root_path, 'static', 'characters', fname)
+            if os.path.exists(img_path):
+                os.remove(img_path)
     db.session.delete(char)
     db.session.commit()
     current_app.logger.info(

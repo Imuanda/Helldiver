@@ -139,6 +139,20 @@ def seed():
     with app.app_context():
         db.create_all()
 
+        # ── Column migrations — adds new columns to existing characters table ──
+        from sqlalchemy import text
+        _migrations = [
+            ('characters', 'image_filename_2', 'VARCHAR(200)'),
+            ('characters', 'image_filename_3', 'VARCHAR(200)'),
+        ]
+        for table, col, col_type in _migrations:
+            try:
+                db.session.execute(text(f'ALTER TABLE {table} ADD COLUMN {col} {col_type}'))
+                db.session.commit()
+                print(f'  [migrate]  Added column {table}.{col}')
+            except Exception:
+                db.session.rollback()  # column already exists — skip silently
+
         added   = 0
         skipped = 0
 
