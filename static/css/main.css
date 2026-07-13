@@ -1711,3 +1711,48 @@ ul { list-style: none; }
     background: rgba(192, 57, 43, 0.12);
     border-color: #e74c3c;
 }
+
+/* ── Admin — progressive photo slots ────────────────────── */
+.photo-slot {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 10px;
+    padding: 0.9rem 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.slot-number {
+    font-size: 0.75rem;
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.06em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+}
+
+.slot-current {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 0.65rem;
+}
+
+.slot-current img {
+    width: 72px;
+    height: 90px;
+    object-fit: cover;
+    object-position: top center;
+    border-radius: 6px;
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    flex-shrink: 0;
+}
+
+.remove-label {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.78rem;
+    color: #e74c3c;
+    cursor: pointer;
+    margin-top: 0.35rem;
+}
