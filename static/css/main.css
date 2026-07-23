@@ -1330,15 +1330,6 @@ ul { list-style: none; }
         display: none;
     }
 
-    /* Characters page — single column on mobile */
-    .characters-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .char-image-wrap {
-        height: 220px;
-    }
-
     /* Admin char list — stack info on mobile */
     .admin-char-row {
         flex-direction: column;
@@ -1383,9 +1374,59 @@ ul { list-style: none; }
     gap: 1.75rem;
 }
 
+/* ── Characters responsive — ordered largest → smallest ───── */
+
+/* Tablet: 2 columns */
 @media (max-width: 900px) {
     .characters-grid {
         grid-template-columns: repeat(2, 1fr);
+        gap: 1.25rem;
+    }
+}
+
+/* Large phone / small tablet: tighter padding */
+@media (max-width: 768px) {
+    .characters-page {
+        padding: 4.5rem 1rem 3rem;
+    }
+
+    .characters-header {
+        margin-bottom: 2rem;
+    }
+}
+
+/* Phone: single column */
+@media (max-width: 600px) {
+    .characters-page {
+        padding: 4rem 0.85rem 2.5rem;
+    }
+
+    .characters-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .char-image-wrap {
+        height: 280px;
+    }
+
+    .characters-header {
+        margin-bottom: 1.5rem;
+    }
+
+    .char-body {
+        padding: 0.9rem 1rem 1.1rem;
+    }
+}
+
+/* Touch devices — always show carousel arrows (no hover on mobile) */
+@media (hover: none) {
+    .char-prev,
+    .char-next {
+        opacity: 0.8;
+        width: 36px;
+        height: 36px;
+        font-size: 1.4rem;
     }
 }
 
